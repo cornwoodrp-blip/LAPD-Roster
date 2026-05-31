@@ -1046,7 +1046,7 @@
       "id": "342-44",
       "callsign": "342",
       "name": "S. Birdy",
-      "activity": "Active",
+      "activity": "M-LOA",
       "rank": "Sr. Officer",
       "divisions": {
         "Canine": false,
@@ -7243,6 +7243,6 @@
       "vacant": true
     }
   ],
-  "updatedAt": "2026-05-31T20:45:57.362Z",
-  "updatedBy": "admin@pd.local"
+  "updatedAt": "2026-05-31T21:19:44.645Z",
+  "updatedBy": "cornwoodrp@gmail.com"
 }
