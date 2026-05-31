@@ -1,0 +1,11 @@
+{
+  "name": "pd-roster",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import:roster": "node scripts/import-roster.mjs",
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}

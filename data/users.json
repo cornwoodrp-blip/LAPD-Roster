@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": "admin",
+      "name": "Roster Admin",
+      "email": "admin@pd.local",
+      "password": "admin123",
+      "role": "admin",
+      "canEditRoster": true,
+      "canManageUsers": true
+    },
+    {
+      "id": "editor",
+      "name": "Roster Editor",
+      "email": "editor@pd.local",
+      "password": "editor123",
+      "role": "editor",
+      "canEditRoster": true,
+      "canManageUsers": false
+    },
+    {
+      "id": "viewer",
+      "name": "Read Only",
+      "email": "viewer@pd.local",
+      "password": "viewer123",
+      "role": "viewer",
+      "canEditRoster": false,
+      "canManageUsers": false
+    }
+  ]
+}

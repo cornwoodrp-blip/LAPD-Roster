@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LAPD Roster</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" id="departmentLabel">Police Department</p>
+        <h1>PD Roster</h1>
+      </div>
+      <nav class="nav">
+        <button class="nav-button active" data-view="public">Public Roster</button>
+        <button class="nav-button" data-view="apply">Apply</button>
+        <button class="nav-button" data-view="dashboard">Backend Dashboard</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="summary-grid" aria-label="Roster summary">
+        <div class="metric">
+          <span>Total slots</span>
+          <strong id="totalSlots">0</strong>
+        </div>
+        <div class="metric">
+          <span>Active personnel</span>
+          <strong id="activeCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>Vacant slots</span>
+          <strong id="vacantCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>LOA / inactive</span>
+          <strong id="inactiveCount">0</strong>
+        </div>
+      </section>
+
+      <section id="applyView" class="view hidden">
+        <form id="applicationForm" class="application-form">
+          <div>
+            <p class="eyebrow">Department Application</p>
+            <h2 id="applicationHeading">Apply to the department</h2>
+          </div>
+          <div class="form-grid">
+            <label><span>Character's First &amp; Last Name</span><input name="name" required></label>
+            <label><span>Discord Username</span><input name="discord" placeholder="username or ID" required></label>
+            <label><span>IRL Age</span><input name="age" type="number" min="1" required></label>
+            <label>
+              <span>Do you have a faction character?</span>
+              <select name="factionCharacter" required>
+                <option value="">Select…</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            <span>In your opinion, what do you consider to be high quality roleplay as a law enforcement officer? Give examples. <em>(500 word minimum)</em></span>
+            <textarea name="roleplayPhilosophy" rows="12" required></textarea>
+            <small class="word-count" id="roleplayCount"></small>
+          </label>
+          <label>
+            <span>Describe your character and their unique traits. Do they speak with an accent? Do they have any weird habits? <em>(50 word minimum)</em></span>
+            <textarea name="characterDescription" rows="5" required></textarea>
+            <small class="word-count" id="characterCount"></small>
+          </label>
+          <label>
+            <span>Do you have other LEO experience? If so, what servers, what was your highest rank, and how many members did your department have?</span>
+            <textarea name="leoExperience" rows="4"></textarea>
+          </label>
+          <label>
+            <span>Have you ever been banned from New Leaf / The Lands? If so, for what reason?</span>
+            <textarea name="bannedHistory" rows="3" required></textarea>
+          </label>
+          <label>
+            <span>Please provide any clips that showcase your best RP (Civ, Crim, LEO, etc)</span>
+            <textarea name="clips" rows="3" placeholder="Paste links here, one per line"></textarea>
+          </label>
+          <button type="submit">Submit application</button>
+          <p id="applicationNotice" class="notice"></p>
+        </form>
+      </section>
+
+      <section id="publicView" class="view">
+        <div id="categoryOverview" class="category-overview" aria-label="Roster categories"></div>
+        <div class="toolbar">
+          <label class="search">
+            <span>Search</span>
+            <input id="searchInput" type="search" placeholder="Name, callsign, rank, division">
+          </label>
+          <label>
+            <span>Activity</span>
+            <select id="activityFilter">
+              <option value="">All activity</option>
+            </select>
+          </label>
+          <label>
+            <span>Rank</span>
+            <select id="rankFilter">
+              <option value="">All ranks</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Callsign</th>
+                <th>Name</th>
+                <th>Activity</th>
+                <th>Rank</th>
+                <th>Divisions</th>
+                <th>Strikes</th>
+                <th>Promotion</th>
+                <th>TIG</th>
+              </tr>
+            </thead>
+            <tbody id="rosterBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="dashboardView" class="view hidden">
+        <div id="authPanel" class="auth-panel">
+          <form id="loginForm" class="login-form">
+            <h2>Dashboard Login</h2>
+            <p>Seed accounts: admin@pd.local / admin123, editor@pd.local / editor123, viewer@pd.local / viewer123.</p>
+            <label>
+              <span>Email</span>
+              <input name="email" type="email" value="admin@pd.local" required>
+            </label>
+            <label>
+              <span>Password</span>
+              <input name="password" type="password" value="admin123" required>
+            </label>
+            <button type="submit">Sign in</button>
+          </form>
+        </div>
+
+        <div id="dashboardPanel" class="dashboard hidden">
+          <div class="dashboard-head">
+            <div>
+              <p class="eyebrow">Signed in as <span id="signedInAs"></span></p>
+              <h2>Roster Dashboard</h2>
+            </div>
+            <button id="logoutButton" class="secondary">Sign out</button>
+          </div>
+
+          <div class="dashboard-grid">
+            <form id="entryForm" class="editor-panel">
+              <h3 id="entryFormTitle">Edit roster entry</h3>
+              <input type="hidden" name="id">
+              <div class="form-grid">
+                <label><span>Callsign</span><input name="callsign"></label>
+                <label><span>Name</span><input name="name"></label>
+                <label><span>Activity</span><input name="activity"></label>
+                <label><span>Rank</span><input name="rank"></label>
+                <label><span>Promotion date</span><input name="promotionDate"></label>
+                <label><span>TIG</span><input name="tig"></label>
+              </div>
+              <fieldset>
+                <legend>Divisions</legend>
+                <div class="checks" id="divisionChecks"></div>
+              </fieldset>
+              <fieldset>
+                <legend>Strikes</legend>
+                <div class="checks" id="strikeChecks"></div>
+              </fieldset>
+              <label><span>Notes</span><textarea name="notes" rows="3"></textarea></label>
+              <label class="checkbox"><input name="vacant" type="checkbox"> Vacant slot</label>
+              <div class="button-row">
+                <button type="submit">Save entry</button>
+                <button id="newEntryButton" type="button" class="secondary">New entry</button>
+                <button id="deleteEntryButton" type="button" class="danger">Delete</button>
+              </div>
+              <p id="editNotice" class="notice"></p>
+            </form>
+
+            <section class="editor-panel">
+              <h3>Entries</h3>
+              <div class="mini-list" id="entryList"></div>
+            </section>
+          </div>
+
+          <section class="editor-panel applications-admin">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Application Inbox</p>
+                <h3>Department applications</h3>
+              </div>
+              <button id="refreshApplicationsButton" type="button" class="secondary">Refresh</button>
+            </div>
+            <div class="applications-layout">
+              <div class="mini-list applications" id="applicationList"></div>
+              <form id="acceptApplicationForm" class="accept-form">
+                <h3 id="acceptFormTitle">Accept applicant</h3>
+                <input name="applicationId" type="hidden">
+                <label><span>Applicant</span><input name="name" disabled></label>
+                <div class="form-grid">
+                  <label><span>Callsign</span><input name="callsign" required></label>
+                  <label><span>Rank</span><input name="rank" value="Cadet" required></label>
+                </div>
+                <label><span>Promotion date</span><input name="promotionDate"></label>
+                <div class="button-row">
+                  <button type="submit">Accept and add cadet</button>
+                  <button id="rejectApplicationButton" type="button" class="danger">Reject</button>
+                </div>
+                <p id="applicationDetail" class="notice"></p>
+              </form>
+            </div>
+          </section>
+
+          <section id="userAdmin" class="editor-panel user-admin hidden">
+            <h3>User permissions</h3>
+            <form id="userForm" class="user-form">
+              <input name="id" type="hidden">
+              <input name="name" placeholder="Name" required>
+              <input name="email" type="email" placeholder="Email" required>
+              <input name="password" placeholder="Password">
+              <select name="role">
+                <option value="viewer">Viewer</option>
+                <option value="editor">Editor</option>
+                <option value="admin">Admin</option>
+              </select>
+              <label class="checkbox"><input name="canEditRoster" type="checkbox"> Can edit roster</label>
+              <label class="checkbox"><input name="canManageUsers" type="checkbox"> Can manage users</label>
+              <button type="submit">Save user</button>
+              <button id="newUserButton" type="button" class="secondary">New user</button>
+            </form>
+            <div class="mini-list users" id="userList"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
