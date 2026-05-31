@@ -168,7 +168,7 @@ function renderRosterTable() {
         <td><span class="pill-row">${renderPills(divisionPills)}</span></td>
         <td><span class="pill-row">${renderPills(strikePills.map((strike) => `Strike ${strike}`))}</span></td>
         <td>${escapeHtml(entry.promotionDate || "-")}</td>
-        <td>${escapeHtml(entry.tig || "-")}</td>
+        <td>${escapeHtml(formatTig(entry.tig))}</td>
       </tr>`;
         })
         .join("");
@@ -234,6 +234,20 @@ function renderApplications() {
         )
         .join("")
     : `<div class="empty-state">No applications yet.</div>`;
+}
+
+function formatTig(value) {
+  const days = parseInt(value, 10);
+  if (isNaN(days) || value === "") return value || "-";
+  if (days === 0) return "0 days";
+  const months = Math.floor(days / 30);
+  const weeks = Math.floor((days % 30) / 7);
+  const d = days % 7;
+  const parts = [];
+  if (months) parts.push(`${months} ${months === 1 ? "month" : "months"}`);
+  if (weeks) parts.push(`${weeks} ${weeks === 1 ? "week" : "weeks"}`);
+  if (d) parts.push(`${d} ${d === 1 ? "day" : "days"}`);
+  return parts.join(", ");
 }
 
 function formatDate(value) {
