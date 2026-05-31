@@ -14,7 +14,7 @@
       </div>
       <nav class="nav">
         <button class="nav-button active" data-view="public">Public Roster</button>
-        <button class="nav-button" data-view="apply">Apply</button>
+        <button class="nav-button" data-view="apply">Applications</button>
         <button class="nav-button" data-view="dashboard">Admin Panel</button>
       </nav>
     </header>
@@ -41,68 +41,81 @@
 
       <section id="applyView" class="view hidden">
 
-        <div id="applicationStatusPanel" class="application-form hidden">
-          <p class="eyebrow">Application Status</p>
-          <h2 id="statusName"></h2>
-          <p id="statusBadge" class="status-badge"></p>
-          <p id="statusMessage" class="notice"></p>
-          <p id="statusDate" class="muted-text"></p>
-          <button id="applyAgainButton" type="button" class="secondary">Submit a new application</button>
+        <div class="apply-tabs-bar">
+          <button class="apply-tab active" data-tab="apply">Apply</button>
+          <button class="apply-tab" data-tab="status">Application Status</button>
         </div>
 
-        <form id="applicationForm" class="application-form">
-          <div>
-            <p class="eyebrow">Department Application</p>
-            <h2 id="applicationHeading">Apply to the department</h2>
-          </div>
-          <div class="form-grid">
-            <label><span>Character's First &amp; Last Name</span><input name="name" required></label>
-            <label><span>Discord Username</span><input name="discord" placeholder="username or ID" required></label>
-            <label><span>IRL Age</span><input name="age" type="number" min="1" required></label>
+        <div id="applyTabContent">
+          <form id="applicationForm" class="application-form">
+            <div>
+              <p class="eyebrow">Department Application</p>
+              <h2 id="applicationHeading">Apply to the department</h2>
+            </div>
+            <div class="form-grid">
+              <label><span>Character's First &amp; Last Name</span><input name="name" required></label>
+              <label><span>Discord Username</span><input name="discord" placeholder="username or ID" required></label>
+              <label><span>IRL Age</span><input name="age" type="number" min="1" required></label>
+              <label>
+                <span>Do you have a faction character?</span>
+                <select name="factionCharacter" required>
+                  <option value="">Select…</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </label>
+            </div>
             <label>
-              <span>Do you have a faction character?</span>
-              <select name="factionCharacter" required>
-                <option value="">Select…</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
+              <span>In your opinion, what do you consider to be high quality roleplay as a law enforcement officer? Give examples. <em>(500 word minimum)</em></span>
+              <textarea name="roleplayPhilosophy" rows="12" required></textarea>
+              <small class="word-count" id="roleplayCount"></small>
             </label>
-          </div>
-          <label>
-            <span>In your opinion, what do you consider to be high quality roleplay as a law enforcement officer? Give examples. <em>(500 word minimum)</em></span>
-            <textarea name="roleplayPhilosophy" rows="12" required></textarea>
-            <small class="word-count" id="roleplayCount"></small>
-          </label>
-          <label>
-            <span>Describe your character and their unique traits. Do they speak with an accent? Do they have any weird habits? <em>(50 word minimum)</em></span>
-            <textarea name="characterDescription" rows="5" required></textarea>
-            <small class="word-count" id="characterCount"></small>
-          </label>
-          <label>
-            <span>Do you have other LEO experience? If so, what servers, what was your highest rank, and how many members did your department have?</span>
-            <textarea name="leoExperience" rows="4"></textarea>
-          </label>
-          <label>
-            <span>Have you ever been banned from New Leaf / The Lands? If so, for what reason?</span>
-            <textarea name="bannedHistory" rows="3" required></textarea>
-          </label>
-          <label>
-            <span>Please provide any clips that showcase your best RP (Civ, Crim, LEO, etc)</span>
-            <textarea name="clips" rows="3" placeholder="Paste links here, one per line"></textarea>
-          </label>
-          <button type="submit">Submit application</button>
-          <p id="applicationNotice" class="notice"></p>
-        </form>
-
-        <div class="status-lookup">
-          <p class="eyebrow">Check status on another device</p>
-          <p>Enter the Discord username you used on your application.</p>
-          <div class="discord-lookup-row">
-            <input id="discordLookupInput" placeholder="Discord username">
-            <button id="discordLookupButton" type="button">Check status</button>
-          </div>
-          <div id="discordLookupResult"></div>
+            <label>
+              <span>Describe your character and their unique traits. Do they speak with an accent? Do they have any weird habits? <em>(50 word minimum)</em></span>
+              <textarea name="characterDescription" rows="5" required></textarea>
+              <small class="word-count" id="characterCount"></small>
+            </label>
+            <label>
+              <span>Do you have other LEO experience? If so, what servers, what was your highest rank, and how many members did your department have?</span>
+              <textarea name="leoExperience" rows="4"></textarea>
+            </label>
+            <label>
+              <span>Have you ever been banned from New Leaf / The Lands? If so, for what reason?</span>
+              <textarea name="bannedHistory" rows="3" required></textarea>
+            </label>
+            <label>
+              <span>Please provide any clips that showcase your best RP (Civ, Crim, LEO, etc)</span>
+              <textarea name="clips" rows="3" placeholder="Paste links here, one per line"></textarea>
+            </label>
+            <button type="submit">Submit application</button>
+            <p id="applicationNotice" class="notice"></p>
+          </form>
         </div>
+
+        <div id="statusTabContent" class="hidden">
+          <div id="applicationStatusPanel" class="application-form hidden">
+            <p class="eyebrow">Application Status</p>
+            <h2 id="statusName"></h2>
+            <p id="statusBadge" class="status-badge"></p>
+            <p id="statusMessage" class="notice"></p>
+            <p id="statusDate" class="muted-text"></p>
+            <button id="applyAgainButton" type="button" class="secondary">Submit a new application</button>
+          </div>
+          <div id="noApplicationMessage" class="application-form">
+            <p class="eyebrow">Application Status</p>
+            <p>No application found in this browser. Use the Discord lookup below, or head to the <strong>Apply</strong> tab to submit one.</p>
+          </div>
+          <div class="status-lookup">
+            <p class="eyebrow">Check by Discord</p>
+            <p>Enter the Discord username you used on your application.</p>
+            <div class="discord-lookup-row">
+              <input id="discordLookupInput" placeholder="Discord username">
+              <button id="discordLookupButton" type="button">Check status</button>
+            </div>
+            <div id="discordLookupResult"></div>
+          </div>
+        </div>
+
       </section>
 
       <section id="publicView" class="view">

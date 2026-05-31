@@ -415,6 +415,12 @@ function userToForm(user = {}) {
   fields.canManageUsers.checked = Boolean(user.canManageUsers);
 }
 
+function switchApplyTab(tab) {
+  $$(".apply-tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+  $("#applyTabContent").classList.toggle("hidden", tab !== "apply");
+  $("#statusTabContent").classList.toggle("hidden", tab !== "status");
+}
+
 const statusMessages = {
   pending: "Your application is under review by command staff. We'll be in touch via Discord.",
   accepted: "Your application has been accepted! Please check your Discord for next steps.",
@@ -431,7 +437,8 @@ function showApplicationStatus(application) {
   $("#statusDate").textContent = `Submitted ${formatDate(application.submittedAt)}` +
     (application.reviewedAt ? `  ·  Reviewed ${formatDate(application.reviewedAt)}` : "");
   $("#applicationStatusPanel").classList.remove("hidden");
-  $("#applicationForm").classList.add("hidden");
+  $("#noApplicationMessage").classList.add("hidden");
+  switchApplyTab("status");
 }
 
 async function checkSavedApplicationStatus() {
@@ -446,6 +453,10 @@ async function checkSavedApplicationStatus() {
 }
 
 function wireEvents() {
+  $$(".apply-tab").forEach((button) => {
+    button.addEventListener("click", () => switchApplyTab(button.dataset.tab));
+  });
+
   $$(".nav-button").forEach((button) => {
     button.addEventListener("click", () => {
       $$(".nav-button").forEach((item) => item.classList.remove("active"));
@@ -459,7 +470,8 @@ function wireEvents() {
   $("#applyAgainButton").addEventListener("click", () => {
     localStorage.removeItem("pd_application_id");
     $("#applicationStatusPanel").classList.add("hidden");
-    $("#applicationForm").classList.remove("hidden");
+    $("#noApplicationMessage").classList.remove("hidden");
+    switchApplyTab("apply");
   });
 
   $("#discordLookupButton").addEventListener("click", async () => {

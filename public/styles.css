@@ -363,6 +363,34 @@ tr:hover td {
   margin: 0;
 }
 
+.apply-tabs-bar {
+  display: flex;
+  margin: 0 auto;
+  max-width: 860px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.apply-tab {
+  flex: 1;
+  background: var(--surface);
+  border: none;
+  border-radius: 0;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 12px;
+}
+
+.apply-tab:not(:last-child) {
+  border-right: 1px solid var(--line);
+}
+
+.apply-tab.active {
+  background: var(--blue);
+  color: white;
+}
+
 .status-lookup {
   background: var(--surface);
   border: 1px solid var(--line);
