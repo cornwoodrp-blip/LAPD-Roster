@@ -158,17 +158,18 @@ function renderRosterTable() {
       </tr>`;
       const entryRows = entries
         .map((entry) => {
-          const divisionPills = activeDivisions(entry);
+          const isVacant = entry.vacant || entry.activity === "Vacant";
+          const divisionPills = isVacant ? [] : activeDivisions(entry);
           const strikePills = activeStrikes(entry);
           return `<tr>
         <td>${escapeHtml(entry.callsign || "-")}</td>
         <td>${escapeHtml(entry.name || "Vacant")}</td>
         <td class="${statusClass(entry.activity)}">${escapeHtml(entry.activity || "Vacant")}</td>
         <td>${escapeHtml(entry.rank || "-")}</td>
-        <td><span class="pill-row">${renderPills(divisionPills)}</span></td>
+        <td><span class="pill-row">${isVacant ? "" : renderPills(divisionPills)}</span></td>
         <td><span class="pill-row">${renderPills(strikePills.map((strike) => `Strike ${strike}`))}</span></td>
         <td>${escapeHtml(entry.promotionDate || "-")}</td>
-        <td>${escapeHtml(formatTig(entry.tig))}</td>
+        <td>${isVacant ? "" : escapeHtml(formatTig(entry.tig))}</td>
       </tr>`;
         })
         .join("");
