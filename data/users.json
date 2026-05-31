@@ -10,6 +10,15 @@
       "canManageUsers": true
     },
     {
+      "id": "cornwoodrp-admin",
+      "name": "Cornwood Admin",
+      "email": "cornwoodrp@gmail.com",
+      "password": "Pass1234",
+      "role": "admin",
+      "canEditRoster": true,
+      "canManageUsers": true
+    },
+    {
       "id": "editor",
       "name": "Roster Editor",
       "email": "editor@pd.local",
