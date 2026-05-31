@@ -191,15 +191,7 @@ async function handleApi(req, res) {
       send(res, 400, { error: "Name, Discord, and all required essay fields are required." });
       return;
     }
-    const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length;
-    if (wordCount(next.roleplayPhilosophy) < 500) {
-      send(res, 400, { error: `Roleplay philosophy must be at least 500 words (got ${wordCount(next.roleplayPhilosophy)}).` });
-      return;
-    }
-    if (wordCount(next.characterDescription) < 50) {
-      send(res, 400, { error: `Character description must be at least 50 words (got ${wordCount(next.characterDescription)}).` });
-      return;
-    }
+
     const data = await readJson(applicationsPath);
     data.applications.unshift(next);
     await writeJson(applicationsPath, data);

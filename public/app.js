@@ -495,15 +495,6 @@ function wireEvents() {
     event.preventDefault();
     const form = event.currentTarget;
     const fields = form.elements;
-    const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length;
-    if (wordCount(fields.roleplayPhilosophy.value) < 500) {
-      $("#applicationNotice").textContent = `Roleplay philosophy response must be at least 500 words (currently ${wordCount(fields.roleplayPhilosophy.value)}).`;
-      return;
-    }
-    if (wordCount(fields.characterDescription.value) < 50) {
-      $("#applicationNotice").textContent = `Character description must be at least 50 words (currently ${wordCount(fields.characterDescription.value)}).`;
-      return;
-    }
     try {
       const next = await api("/api/applications", {
         method: "POST",
@@ -533,29 +524,16 @@ function wireEvents() {
     }
   });
 
-  const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length;
-
   function updateSubmitState() {
     const f = $("#applicationForm").elements;
-    const rpCount = wordCount(f.roleplayPhilosophy.value);
-    const charCount = wordCount(f.characterDescription.value);
-    const rpMet = rpCount >= 500;
-    const charMet = charCount >= 50;
-
-    $("#roleplayCount").textContent = `${rpCount} / 500 words`;
-    $("#roleplayCount").style.color = rpMet ? "var(--green)" : "var(--red)";
-    $("#characterCount").textContent = `${charCount} / 50 words`;
-    $("#characterCount").style.color = charMet ? "var(--green)" : "var(--red)";
-
     const allFilled =
       f.name.value.trim() &&
       f.discord.value.trim() &&
       f.age.value.trim() &&
       f.factionCharacter.value &&
       f.bannedHistory.value.trim() &&
-      rpMet &&
-      charMet;
-
+      f.roleplayPhilosophy.value.trim() &&
+      f.characterDescription.value.trim();
     $("#applicationForm [type=submit]").disabled = !allFilled;
   }
 
