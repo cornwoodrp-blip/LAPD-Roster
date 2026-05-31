@@ -323,22 +323,44 @@ async function handleApi(req, res) {
 
     const roster = await readJson(rosterPath);
     const application = applications.applications[index];
-    const entry = sanitizeRosterEntry({
-      callsign: payload.callsign,
-      name: application.name,
-      activity: "Active",
-      rank: payload.rank || "Cadet",
-      divisions: {},
-      strikes: {},
-      notes: [
-        application.discord ? `discord: ${application.discord}` : "",
-        application.leoExperience ? `leo exp: ${application.leoExperience}` : ""
-      ].filter(Boolean).join(" | "),
-      promotionDate: payload.promotionDate || new Date().toLocaleDateString("en-US"),
-      tig: "",
-      vacant: false
-    });
-    roster.roster.push(entry);
+    const notes = [
+      application.discord ? `discord: ${application.discord}` : "",
+      application.leoExperience ? `leo exp: ${application.leoExperience}` : ""
+    ].filter(Boolean).join(" | ");
+
+    let entry;
+    const vacantIndex = payload.vacantEntryId
+      ? roster.roster.findIndex((e) => e.id === payload.vacantEntryId)
+      : -1;
+
+    if (vacantIndex !== -1) {
+      entry = sanitizeRosterEntry({
+        ...roster.roster[vacantIndex],
+        name: application.name,
+        callsign: payload.callsign || roster.roster[vacantIndex].callsign,
+        activity: "Active",
+        rank: payload.rank || roster.roster[vacantIndex].rank,
+        notes,
+        promotionDate: payload.promotionDate || new Date().toLocaleDateString("en-US"),
+        tig: "",
+        vacant: false
+      }, roster.roster[vacantIndex]);
+      roster.roster[vacantIndex] = entry;
+    } else {
+      entry = sanitizeRosterEntry({
+        callsign: payload.callsign,
+        name: application.name,
+        activity: "Active",
+        rank: payload.rank || "Cadet",
+        divisions: {},
+        strikes: {},
+        notes,
+        promotionDate: payload.promotionDate || new Date().toLocaleDateString("en-US"),
+        tig: "",
+        vacant: false
+      });
+      roster.roster.push(entry);
+    }
     roster.updatedAt = new Date().toISOString();
     roster.updatedBy = user.email;
     await writeJson(rosterPath, roster);

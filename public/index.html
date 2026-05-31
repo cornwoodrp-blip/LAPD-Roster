@@ -15,7 +15,7 @@
       <nav class="nav">
         <button class="nav-button active" data-view="public">Public Roster</button>
         <button class="nav-button" data-view="apply">Apply</button>
-        <button class="nav-button" data-view="dashboard">Backend Dashboard</button>
+        <button class="nav-button" data-view="dashboard">Admin Panel</button>
       </nav>
     </header>
 
@@ -127,15 +127,14 @@
       <section id="dashboardView" class="view hidden">
         <div id="authPanel" class="auth-panel">
           <form id="loginForm" class="login-form">
-            <h2>Dashboard Login</h2>
-            <p>Seed accounts: admin@pd.local / admin123, editor@pd.local / editor123, viewer@pd.local / viewer123.</p>
+            <h2>Admin Panel</h2>
             <label>
               <span>Email</span>
-              <input name="email" type="email" value="admin@pd.local" required>
+              <input name="email" type="email" required>
             </label>
             <label>
               <span>Password</span>
-              <input name="password" type="password" value="admin123" required>
+              <input name="password" type="password" required>
             </label>
             <button type="submit">Sign in</button>
           </form>
@@ -199,14 +198,21 @@
               <form id="acceptApplicationForm" class="accept-form">
                 <h3 id="acceptFormTitle">Accept applicant</h3>
                 <input name="applicationId" type="hidden">
+                <input name="vacantEntryId" type="hidden">
                 <label><span>Applicant</span><input name="name" disabled></label>
+                <label>
+                  <span>Vacant roster slot</span>
+                  <select id="vacantCallsignPicker">
+                    <option value="">— or fill callsign &amp; rank manually below —</option>
+                  </select>
+                </label>
                 <div class="form-grid">
                   <label><span>Callsign</span><input name="callsign" required></label>
                   <label><span>Rank</span><input name="rank" value="Cadet" required></label>
                 </div>
                 <label><span>Promotion date</span><input name="promotionDate"></label>
                 <div class="button-row">
-                  <button type="submit">Accept and add cadet</button>
+                  <button type="submit">Accept and add to roster</button>
                   <button id="rejectApplicationButton" type="button" class="danger">Reject</button>
                 </div>
                 <p id="applicationDetail" class="notice"></p>

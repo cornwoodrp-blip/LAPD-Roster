@@ -282,15 +282,26 @@ function entryToForm(entry) {
   $("#deleteEntryButton").disabled = !entry;
 }
 
+function populateVacantCallsigns() {
+  const vacant = rosterData.roster.filter((e) => e.vacant || e.activity === "Vacant");
+  $("#vacantCallsignPicker").innerHTML = [
+    `<option value="">— or fill callsign &amp; rank manually below —</option>`,
+    ...vacant.map((e) => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.callsign)} — ${escapeHtml(e.rank || "Unknown")}</option>`)
+  ].join("");
+}
+
 function applicationToAcceptForm(application) {
   const form = $("#acceptApplicationForm");
   const fields = form.elements;
   selectedApplicationId = application?.id || null;
   fields.applicationId.value = application?.id || "";
+  fields.vacantEntryId.value = "";
   fields.name.value = application?.name || "";
   fields.callsign.value = "";
   fields.rank.value = "Cadet";
   fields.promotionDate.value = new Date().toLocaleDateString("en-US");
+  populateVacantCallsigns();
+  $("#vacantCallsignPicker").value = "";
   $("#acceptFormTitle").textContent = application ? `Accept ${application.name}` : "Accept applicant";
   $("#applicationDetail").textContent = application
     ? [
@@ -304,7 +315,7 @@ function applicationToAcceptForm(application) {
         application.status !== "pending" ? `Status: ${application.status}` : ""
       ].filter(Boolean).join("\n\n")
     : "Select a pending application to review it.";
-  $$("#acceptApplicationForm input, #acceptApplicationForm button").forEach((control) => {
+  $$("#acceptApplicationForm input, #acceptApplicationForm select, #acceptApplicationForm button").forEach((control) => {
     if (control.name === "name") return;
     control.disabled = !application || application.status !== "pending" || !sessionUser?.canEditRoster;
   });
@@ -577,6 +588,25 @@ function wireEvents() {
 
   $("#refreshApplicationsButton").addEventListener("click", () => loadApplications());
 
+  $("#vacantCallsignPicker").addEventListener("change", (e) => {
+    const entry = rosterData.roster.find((r) => r.id === e.target.value);
+    const f = $("#acceptApplicationForm").elements;
+    if (entry) {
+      f.callsign.value = entry.callsign;
+      f.rank.value = entry.rank || "Cadet";
+      f.vacantEntryId.value = entry.id;
+    } else {
+      f.vacantEntryId.value = "";
+    }
+  });
+
+  ["callsign", "rank"].forEach((name) => {
+    $("#acceptApplicationForm").elements[name].addEventListener("input", () => {
+      $("#acceptApplicationForm").elements.vacantEntryId.value = "";
+      $("#vacantCallsignPicker").value = "";
+    });
+  });
+
   $("#applicationList").addEventListener("click", (event) => {
     const button = event.target.closest("[data-application-id]");
     if (!button) return;
@@ -597,7 +627,8 @@ function wireEvents() {
         body: JSON.stringify({
           callsign: fields.callsign.value,
           rank: fields.rank.value || "Cadet",
-          promotionDate: fields.promotionDate.value
+          promotionDate: fields.promotionDate.value,
+          vacantEntryId: fields.vacantEntryId.value
         })
       });
       selectedEntryId = result.rosterEntry.id;
