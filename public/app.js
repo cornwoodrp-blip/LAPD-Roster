@@ -239,15 +239,15 @@ function renderApplications() {
 function formatTig(value) {
   const days = parseInt(value, 10);
   if (isNaN(days) || value === "") return value || "-";
-  if (days === 0) return "0 days";
-  const months = Math.floor(days / 30);
-  const weeks = Math.floor((days % 30) / 7);
-  const d = days % 7;
+  if (days === 0) return "0D";
+  const years = Math.floor(days / 365);
+  const months = Math.floor((days % 365) / 30);
+  const d = days % 30;
   const parts = [];
-  if (months) parts.push(`${months} ${months === 1 ? "month" : "months"}`);
-  if (weeks) parts.push(`${weeks} ${weeks === 1 ? "week" : "weeks"}`);
-  if (d) parts.push(`${d} ${d === 1 ? "day" : "days"}`);
-  return parts.join(", ");
+  if (years) parts.push(`${years}Y`);
+  if (months) parts.push(`${months}M`);
+  if (d) parts.push(`${d}D`);
+  return parts.join(" ") || "0D";
 }
 
 function formatDate(value) {
