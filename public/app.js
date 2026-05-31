@@ -161,6 +161,8 @@ function renderRosterTable() {
           const isVacant = entry.vacant || entry.activity === "Vacant";
           const divisionPills = isVacant ? [] : activeDivisions(entry);
           const strikePills = activeStrikes(entry);
+          const tigDays = isVacant ? null : tigFromPromotionDate(entry.promotionDate);
+          const tigDisplay = tigDays !== null ? formatTig(String(tigDays)) : "";
           return `<tr>
         <td>${escapeHtml(entry.callsign || "-")}</td>
         <td>${escapeHtml(entry.name || "Vacant")}</td>
@@ -168,8 +170,8 @@ function renderRosterTable() {
         <td>${escapeHtml(entry.rank || "-")}</td>
         <td><span class="pill-row">${isVacant ? "" : renderPills(divisionPills)}</span></td>
         <td><span class="pill-row">${renderPills(strikePills.map((strike) => `Strike ${strike}`))}</span></td>
-        <td>${escapeHtml(entry.promotionDate || "-")}</td>
-        <td>${isVacant ? "" : escapeHtml(formatTig(entry.tig))}</td>
+        <td>${escapeHtml(formatDate(entry.promotionDate))}</td>
+        <td>${escapeHtml(tigDisplay)}</td>
       </tr>`;
         })
         .join("");
@@ -237,6 +239,24 @@ function renderApplications() {
     : `<div class="empty-state">No applications yet.</div>`;
 }
 
+function toDateInputValue(dateStr) {
+  if (!dateStr || dateStr === "-" || dateStr === "N/A") return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  return "";
+}
+
+function tigFromPromotionDate(promotionDate) {
+  const iso = toDateInputValue(promotionDate);
+  if (!iso) return null;
+  const then = new Date(iso + "T00:00:00");
+  if (isNaN(then.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.floor((today - then) / 86400000));
+}
+
 function formatTig(value) {
   const days = parseInt(value, 10);
   if (isNaN(days) || value === "") return value || "-";
@@ -283,8 +303,7 @@ function entryToForm(entry) {
   fields.name.value = entry?.name || "";
   fields.activity.value = entry?.activity || "";
   fields.rank.value = entry?.rank || "";
-  fields.promotionDate.value = entry?.promotionDate || "";
-  fields.tig.value = entry?.tig || "";
+  fields.promotionDate.value = toDateInputValue(entry?.promotionDate || "");
   fields.notes.value = entry?.notes || "";
   fields.vacant.checked = Boolean(entry?.vacant);
   divisions.forEach((division) => {
@@ -314,7 +333,7 @@ function applicationToAcceptForm(application) {
   fields.name.value = application?.name || "";
   fields.callsign.value = "";
   fields.rank.value = "Cadet";
-  fields.promotionDate.value = new Date().toLocaleDateString("en-US");
+  fields.promotionDate.value = new Date().toISOString().split("T")[0];
   populateVacantCallsigns();
   $("#vacantCallsignPicker").value = "";
   $("#acceptFormTitle").textContent = application ? `Accept ${application.name}` : "Accept applicant";
@@ -347,7 +366,6 @@ function formToEntry() {
     activity: fields.activity.value,
     rank: fields.rank.value,
     promotionDate: fields.promotionDate.value,
-    tig: fields.tig.value,
     notes: fields.notes.value,
     vacant: fields.vacant.checked,
     divisions: Object.fromEntries(divisions.map((division) => [division, fields[`division_${division}`].checked])),
