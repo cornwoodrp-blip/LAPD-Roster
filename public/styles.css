@@ -351,6 +351,43 @@ tr:hover td {
   max-width: 460px;
 }
 
+.status-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.muted-text {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.status-lookup {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  margin: 0 auto;
+  max-width: 860px;
+  padding: 18px;
+}
+
+.status-lookup p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.discord-lookup-row {
+  display: flex;
+  gap: 8px;
+}
+
+.discord-lookup-row input {
+  flex: 1;
+}
+
 .login-form p,
 .notice {
   color: var(--muted);

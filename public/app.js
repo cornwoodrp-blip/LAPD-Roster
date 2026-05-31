@@ -415,6 +415,36 @@ function userToForm(user = {}) {
   fields.canManageUsers.checked = Boolean(user.canManageUsers);
 }
 
+const statusMessages = {
+  pending: "Your application is under review by command staff. We'll be in touch via Discord.",
+  accepted: "Your application has been accepted! Please check your Discord for next steps.",
+  rejected: "Your application was not accepted at this time. You're welcome to reapply in the future."
+};
+
+const statusColors = { pending: "var(--gold)", accepted: "var(--green)", rejected: "var(--red)" };
+
+function showApplicationStatus(application) {
+  $("#statusName").textContent = application.name;
+  $("#statusBadge").textContent = application.status.charAt(0).toUpperCase() + application.status.slice(1);
+  $("#statusBadge").style.color = statusColors[application.status] || "";
+  $("#statusMessage").textContent = statusMessages[application.status] || "";
+  $("#statusDate").textContent = `Submitted ${formatDate(application.submittedAt)}` +
+    (application.reviewedAt ? `  ·  Reviewed ${formatDate(application.reviewedAt)}` : "");
+  $("#applicationStatusPanel").classList.remove("hidden");
+  $("#applicationForm").classList.add("hidden");
+}
+
+async function checkSavedApplicationStatus() {
+  const id = localStorage.getItem("pd_application_id");
+  if (!id) return;
+  try {
+    const application = await api(`/api/applications/status?id=${encodeURIComponent(id)}`);
+    showApplicationStatus(application);
+  } catch {
+    localStorage.removeItem("pd_application_id");
+  }
+}
+
 function wireEvents() {
   $$(".nav-button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -424,6 +454,29 @@ function wireEvents() {
       $("#applyView").classList.toggle("hidden", button.dataset.view !== "apply");
       $("#dashboardView").classList.toggle("hidden", button.dataset.view !== "dashboard");
     });
+  });
+
+  $("#applyAgainButton").addEventListener("click", () => {
+    localStorage.removeItem("pd_application_id");
+    $("#applicationStatusPanel").classList.add("hidden");
+    $("#applicationForm").classList.remove("hidden");
+  });
+
+  $("#discordLookupButton").addEventListener("click", async () => {
+    const discord = $("#discordLookupInput").value.trim();
+    if (!discord) return;
+    try {
+      const application = await api(`/api/applications/status?discord=${encodeURIComponent(discord)}`);
+      localStorage.setItem("pd_application_id", application.id || "");
+      showApplicationStatus(application);
+      $("#discordLookupResult").textContent = "";
+    } catch {
+      $("#discordLookupResult").textContent = "No application found for that Discord username.";
+    }
+  });
+
+  $("#discordLookupInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") $("#discordLookupButton").click();
   });
 
   $("#applicationForm").addEventListener("submit", async (event) => {
@@ -440,7 +493,7 @@ function wireEvents() {
       return;
     }
     try {
-      await api("/api/applications", {
+      const next = await api("/api/applications", {
         method: "POST",
         body: JSON.stringify({
           name: fields.name.value,
@@ -454,10 +507,12 @@ function wireEvents() {
           clips: fields.clips.value
         })
       });
+      localStorage.setItem("pd_application_id", next.application.id);
       form.reset();
       $("#roleplayCount").textContent = "";
       $("#characterCount").textContent = "";
-      $("#applicationNotice").textContent = "Application submitted. Command staff will review it from the dashboard.";
+      updateSubmitState();
+      showApplicationStatus(next.application);
       if (sessionUser?.canEditRoster) await loadApplications();
       toast("Application submitted.");
     } catch (error) {
@@ -694,3 +749,4 @@ wireEvents();
 await loadRoster();
 entryToForm(null);
 await loadSession();
+await checkSavedApplicationStatus();

@@ -279,6 +279,29 @@ async function handleApi(req, res) {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/applications/status") {
+    const id = url.searchParams.get("id");
+    const discord = url.searchParams.get("discord");
+    const data = await readJson(applicationsPath);
+    const application = id
+      ? data.applications.find((a) => a.id === id)
+      : discord
+        ? data.applications.find((a) => a.discord.toLowerCase() === discord.trim().toLowerCase())
+        : null;
+    if (!application) {
+      send(res, 404, { error: "No application found." });
+      return;
+    }
+    send(res, 200, {
+      name: application.name,
+      discord: application.discord,
+      status: application.status,
+      submittedAt: application.submittedAt,
+      reviewedAt: application.reviewedAt || ""
+    });
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/applications") {
     if (!requireEdit(user, res)) return;
     const applications = await readJson(applicationsPath);

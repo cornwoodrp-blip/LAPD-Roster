@@ -40,6 +40,16 @@
       </section>
 
       <section id="applyView" class="view hidden">
+
+        <div id="applicationStatusPanel" class="application-form hidden">
+          <p class="eyebrow">Application Status</p>
+          <h2 id="statusName"></h2>
+          <p id="statusBadge" class="status-badge"></p>
+          <p id="statusMessage" class="notice"></p>
+          <p id="statusDate" class="muted-text"></p>
+          <button id="applyAgainButton" type="button" class="secondary">Submit a new application</button>
+        </div>
+
         <form id="applicationForm" class="application-form">
           <div>
             <p class="eyebrow">Department Application</p>
@@ -83,6 +93,16 @@
           <button type="submit">Submit application</button>
           <p id="applicationNotice" class="notice"></p>
         </form>
+
+        <div class="status-lookup">
+          <p class="eyebrow">Check status on another device</p>
+          <p>Enter the Discord username you used on your application.</p>
+          <div class="discord-lookup-row">
+            <input id="discordLookupInput" placeholder="Discord username">
+            <button id="discordLookupButton" type="button">Check status</button>
+          </div>
+          <div id="discordLookupResult"></div>
+        </div>
       </section>
 
       <section id="publicView" class="view">
