@@ -3,14 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LAPD Roster</title>
+    <title>LSPD Roster</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <p class="eyebrow" id="departmentLabel">Police Department</p>
-        <h1>PD Roster</h1>
+      <div class="topbar-brand">
+        <svg class="lspd-badge" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="52" height="52" aria-hidden="true">
+          <circle cx="40" cy="40" r="38" fill="#07111e" stroke="#d4a820" stroke-width="2"/>
+          <polygon points="40,7 48,30 73,30 53,46 61,70 40,54 19,70 27,46 7,30 32,30" fill="#d4a820"/>
+          <circle cx="40" cy="40" r="15" fill="#07111e" stroke="#d4a820" stroke-width="1.5"/>
+          <text x="40" y="44" text-anchor="middle" fill="#d4a820" font-size="9" font-weight="900" font-family="sans-serif" letter-spacing="0.5">LSPD</text>
+        </svg>
+        <div>
+          <p class="eyebrow">Official Site of The</p>
+          <h1 id="departmentLabel">Los Santos Police Department</h1>
+        </div>
       </div>
       <nav class="nav">
         <button class="nav-button active" data-view="public">Public Roster</button>
