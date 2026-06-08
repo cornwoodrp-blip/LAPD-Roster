@@ -1,18 +1,3 @@
 {
-  "cards": [
-    {
-      "id": "0d33c294-7e33-4adf-8241-747aee770a5c",
-      "name": "Test Character",
-      "discord": "2343",
-      "applicationId": "0d33c294-7e33-4adf-8241-747aee770a5c",
-      "rosterId": "619-235",
-      "stage": "Academy Passed",
-      "createdAt": "2026-06-08T13:38:08.188Z",
-      "callsign": "503",
-      "rank": "Probationary Officer",
-      "acceptedBy": "Cornwood Admin",
-      "movedBy": "Richard Longdonger",
-      "movedAt": "2026-06-08T14:03:03.015Z"
-    }
-  ]
+  "cards": []
 }

@@ -87,10 +87,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: cxshout.j",
-      "promotionDate": "02/24/2025",
-      "tig": "461",
-      "vacant": false
+      "notes": "cxshout.j",
+      "employeeNotes": "",
+      "promotionDate": "2025-02-24",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "103-4",
@@ -112,10 +114,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: Cornwood",
-      "promotionDate": "01/11/2026",
-      "tig": "140",
-      "vacant": false
+      "notes": "Cornwood",
+      "employeeNotes": "",
+      "promotionDate": "2026-01-11",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "104-5",
@@ -137,10 +141,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: menzaro",
-      "promotionDate": "08/06/2025",
-      "tig": "298",
-      "vacant": false
+      "notes": "menzaro",
+      "employeeNotes": "",
+      "promotionDate": "2025-08-06",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "105-6",
@@ -162,10 +168,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: .mrfrankie",
-      "promotionDate": "01/22/2026",
-      "tig": "129",
-      "vacant": false
+      "notes": ".mrfrankie",
+      "employeeNotes": "",
+      "promotionDate": "2026-01-22",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "201-7",
@@ -212,10 +220,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: fawkesthorn",
-      "promotionDate": "03/08/2026",
-      "tig": "84",
-      "vacant": false
+      "notes": "fawkesthorn",
+      "employeeNotes": "",
+      "promotionDate": "2026-03-08",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "203-captain-slot",
@@ -269,7 +279,7 @@
     },
     {
       "id": "205-13",
-      "callsign": "205",
+      "callsign": "204",
       "name": "L. Hondo",
       "activity": "Active",
       "rank": "Lieutenant",
@@ -287,10 +297,12 @@
         "2": false,
         "3": false
       },
-      "notes": "",
-      "promotionDate": "04/03/2026",
-      "tig": "58",
-      "vacant": false
+      "notes": "hondo.l",
+      "employeeNotes": "",
+      "promotionDate": "2026-04-03",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "206-14",
@@ -388,9 +400,11 @@
         "3": false
       },
       "notes": "",
+      "employeeNotes": "",
       "promotionDate": "2026-04-03",
       "tig": "",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "211-18",
@@ -537,10 +551,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: switch1112",
-      "promotionDate": "05/31/2026",
-      "tig": "0",
-      "vacant": false
+      "notes": "switch1112",
+      "employeeNotes": "",
+      "promotionDate": "2026-05-31",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "217-25",
@@ -1137,10 +1153,12 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: nottgotti",
-      "promotionDate": "5/29/26",
-      "tig": "2",
-      "vacant": false
+      "notes": "nottgotti",
+      "employeeNotes": "",
+      "promotionDate": "",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "347-49",
@@ -1762,10 +1780,12 @@
         "2": false,
         "3": false
       },
-      "notes": "Discord: vinnythabody1",
-      "promotionDate": "05/31/2026",
-      "tig": "0",
-      "vacant": false
+      "notes": "vinnythabody1",
+      "employeeNotes": "",
+      "promotionDate": "2026-05-31",
+      "tig": "",
+      "vacant": false,
+      "clearedForPatrol": false
     },
     {
       "id": "403-75",
@@ -3671,32 +3691,6 @@
       "vacant": true
     },
     {
-      "id": "508-167",
-      "callsign": "508",
-      "name": "A. Mason",
-      "activity": "Active",
-      "rank": "Probationary Officer",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "grxmey_1",
-      "promotionDate": "05/09/2026",
-      "tig": "#REF!",
-      "vacant": false,
-      "clearedForPatrol": true
-    },
-    {
       "id": "509-168",
       "callsign": "509",
       "name": "",
@@ -5373,59 +5367,6 @@
       "vacant": true
     },
     {
-      "id": "619-235",
-      "callsign": "503",
-      "name": "Test Character",
-      "activity": "Active",
-      "rank": "Probationary Officer",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "discord: 2343 | leo exp: dfdf",
-      "employeeNotes": "",
-      "promotionDate": "2026-06-08",
-      "tig": "",
-      "vacant": false,
-      "clearedForPatrol": false,
-      "updatedAt": "2026-06-08T14:03:03.016Z"
-    },
-    {
-      "id": "621-237",
-      "callsign": "621",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Recruit",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
       "id": "622-238",
       "callsign": "622",
       "name": "",
@@ -6776,6 +6717,6 @@
       "vacant": true
     }
   ],
-  "updatedAt": "2026-06-08T13:53:29.317Z",
+  "updatedAt": "2026-06-08T17:04:37.644Z",
   "updatedBy": "cornwoodrp@gmail.com"
 }

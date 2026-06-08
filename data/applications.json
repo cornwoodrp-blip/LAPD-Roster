@@ -1,6 +1,23 @@
 {
   "applications": [
     {
+      "id": "ad6b6145-5e03-4bbf-89ef-8043c0e91a8d",
+      "name": "Test Character",
+      "discord": "123",
+      "age": "21",
+      "factionCharacter": "no",
+      "roleplayPhilosophy": "ewewew",
+      "characterDescription": "wewew",
+      "leoExperience": "wewew",
+      "bannedHistory": "wewew",
+      "clips": "wewew",
+      "status": "rejected",
+      "submittedAt": "2026-06-08T16:53:58.601Z",
+      "reviewedAt": "2026-06-08T16:58:18.307Z",
+      "reviewedBy": "cornwoodrp@gmail.com",
+      "rosterEntryId": "621-237"
+    },
+    {
       "id": "d9abfa6c-41f1-4b6d-a6cd-f06f0ff3742b",
       "name": "dfdfd",
       "discord": "dfdfd",
@@ -28,9 +45,9 @@
       "leoExperience": "dfdf",
       "bannedHistory": "dfdfd",
       "clips": "ddd",
-      "status": "accepted",
+      "status": "rejected",
       "submittedAt": "2026-06-08T13:38:08.186Z",
-      "reviewedAt": "2026-06-08T13:39:52.502Z",
+      "reviewedAt": "2026-06-08T16:52:58.463Z",
       "reviewedBy": "cornwoodrp@gmail.com",
       "rosterEntryId": "619-235"
     }
