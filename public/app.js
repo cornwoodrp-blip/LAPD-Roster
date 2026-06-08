@@ -103,6 +103,14 @@ function groupedRoster(rows) {
   rows.forEach((entry) => {
     buckets.get(categoryForRank(entry.rank)).push(entry);
   });
+  for (const entries of buckets.values()) {
+    entries.sort((a, b) => {
+      const na = parseInt(a.callsign, 10);
+      const nb = parseInt(b.callsign, 10);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return String(a.callsign || "").localeCompare(String(b.callsign || ""));
+    });
+  }
   return [...buckets.entries()].filter(([, entries]) => entries.length);
 }
 
