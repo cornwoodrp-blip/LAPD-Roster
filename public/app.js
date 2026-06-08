@@ -726,8 +726,6 @@ function wireEvents() {
       });
       localStorage.setItem("pd_application_id", next.application.id);
       form.reset();
-      $("#roleplayCount").textContent = "";
-      $("#characterCount").textContent = "";
       updateSubmitState();
       showApplicationStatus(next.application);
       if (sessionUser?.canEditRoster) await loadApplications();
