@@ -432,6 +432,9 @@ async function handleApi(req, res) {
     if (cardIdx !== -1) {
       board.cards[cardIdx].stage = "Application Accepted";
       board.cards[cardIdx].rosterId = entry.id;
+      board.cards[cardIdx].acceptedBy = user.name;
+      board.cards[cardIdx].callsign = entry.callsign;
+      board.cards[cardIdx].rank = entry.rank;
     }
     await writeJson(onboardingPath, board);
 
@@ -503,6 +506,7 @@ async function handleApi(req, res) {
     // Academy Passed → promote to Probationary Officer with assigned callsign
     if (payload.stage === "Academy Passed" && payload.callsign) {
       board.cards[cardIdx].callsign = payload.callsign;
+      board.cards[cardIdx].rank = "Probationary Officer";
       if (board.cards[cardIdx].rosterId) {
         const roster = await readJson(rosterPath);
         const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);

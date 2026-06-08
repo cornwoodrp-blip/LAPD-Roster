@@ -545,8 +545,12 @@ function renderKanban() {
             .map(
               (card) => `<div class="kanban-card" draggable="true" data-card-id="${escapeHtml(card.id)}">
               <strong>${escapeHtml(card.name)}</strong>
-              <small>${escapeHtml(card.discord)}</small>
-              ${card.callsign ? `<span class="pill">${escapeHtml(card.callsign)}</span>` : ""}
+              <small class="card-discord">${escapeHtml(card.discord)}</small>
+              ${card.callsign || card.rank ? `<div class="card-meta">
+                ${card.callsign ? `<span class="pill">${escapeHtml(card.callsign)}</span>` : ""}
+                ${card.rank ? `<span class="pill">${escapeHtml(card.rank)}</span>` : ""}
+              </div>` : ""}
+              ${card.acceptedBy ? `<small class="card-accepted">👤 ${escapeHtml(card.acceptedBy)}</small>` : ""}
             </div>`
             )
             .join("")}

@@ -796,6 +796,20 @@ legend {
   font-size: 11px;
 }
 
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.card-accepted {
+  border-top: 1px solid var(--line);
+  color: var(--gold) !important;
+  margin-top: 4px;
+  padding-top: 5px;
+}
+
 /* ── Toast ── */
 
 .toast {
