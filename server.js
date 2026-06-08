@@ -102,7 +102,7 @@ function requireManageUsers(user, res) {
 
 function requireOnboard(user, res) {
   if (!requireUser(user, res)) return false;
-  if (!user.canOnboard) {
+  if (!user.canOnboard && user.role !== "admin") {
     send(res, 403, { error: "Onboarding permission required." });
     return false;
   }

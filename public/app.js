@@ -463,7 +463,8 @@ function setDashboardState() {
   const signedIn = Boolean(sessionUser);
   $("#authPanel").classList.toggle("hidden", signedIn);
   $("#dashboardPanel").classList.toggle("hidden", !signedIn);
-  $("#onboardingNavBtn").classList.toggle("hidden", !sessionUser?.canOnboard);
+  const canSeeOnboarding = sessionUser?.canOnboard || sessionUser?.role === "admin";
+  $("#onboardingNavBtn").classList.toggle("hidden", !canSeeOnboarding);
   if (!signedIn) return;
 
   $("#signedInAs").textContent = `${sessionUser.name} (${sessionUser.role})`;
@@ -494,7 +495,7 @@ async function loadSession() {
   setDashboardState();
   if (sessionUser?.canEditRoster) await loadApplications();
   if (sessionUser?.canManageUsers) await loadUsers();
-  if (sessionUser?.canOnboard) await loadOnboarding();
+  if (sessionUser?.canOnboard || sessionUser?.role === "admin") await loadOnboarding();
 }
 
 async function loadApplications() {
@@ -674,7 +675,7 @@ function wireEvents() {
       $("#applyView").classList.toggle("hidden", view !== "apply");
       $("#dashboardView").classList.toggle("hidden", view !== "dashboard");
       $("#onboardingView").classList.toggle("hidden", view !== "onboarding");
-      if (view === "onboarding" && sessionUser?.canOnboard) loadOnboarding();
+      if (view === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) loadOnboarding();
     });
   });
 
