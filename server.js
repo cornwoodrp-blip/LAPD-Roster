@@ -540,13 +540,46 @@ async function handleApi(req, res) {
     board.cards[cardIdx].movedBy = user.name;
     board.cards[cardIdx].movedAt = new Date().toISOString();
 
-    // Academy Passed → promote to Probationary Officer with assigned callsign
+    // Academy Passed → promote to selected rank and fill the chosen vacant slot
     if (payload.stage === "Academy Passed" && payload.callsign) {
       const newRank = String(payload.rank || "Probationary Officer").trim();
-      board.cards[cardIdx].callsign = payload.callsign;
-      board.cards[cardIdx].rank = newRank;
-      if (board.cards[cardIdx].rosterId) {
-        const roster = await readJson(rosterPath);
+      const roster = await readJson(rosterPath);
+
+      // Find the vacant slot with the selected callsign
+      const vacantIdx = roster.roster.findIndex(
+        (e) => (e.vacant || e.activity === "Vacant") &&
+                String(e.callsign).trim() === String(payload.callsign).trim()
+      );
+
+      if (vacantIdx !== -1) {
+        // Fill the vacant slot with the recruit's details
+        const card = board.cards[cardIdx];
+        roster.roster[vacantIdx].name = card.name;
+        roster.roster[vacantIdx].rank = newRank;
+        roster.roster[vacantIdx].activity = "Active";
+        roster.roster[vacantIdx].vacant = false;
+        roster.roster[vacantIdx].notes = card.discord || "";
+        roster.roster[vacantIdx].promotionDate = new Date().toISOString().split("T")[0];
+        roster.roster[vacantIdx].updatedAt = new Date().toISOString();
+
+        // Vacate the recruit's old slot (if it exists and is a different entry)
+        const oldRosterId = board.cards[cardIdx].rosterId;
+        if (oldRosterId && oldRosterId !== roster.roster[vacantIdx].id) {
+          const oldIdx = roster.roster.findIndex((e) => e.id === oldRosterId);
+          if (oldIdx !== -1) {
+            roster.roster[oldIdx].name = "";
+            roster.roster[oldIdx].activity = "Vacant";
+            roster.roster[oldIdx].vacant = true;
+            roster.roster[oldIdx].notes = "";
+            roster.roster[oldIdx].promotionDate = "";
+            roster.roster[oldIdx].updatedAt = new Date().toISOString();
+          }
+        }
+
+        // Point the card's rosterId at the new PO slot
+        board.cards[cardIdx].rosterId = roster.roster[vacantIdx].id;
+      } else if (board.cards[cardIdx].rosterId) {
+        // Fallback: no matching vacant slot, just update the existing entry in place
         const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);
         if (rIdx !== -1) {
           roster.roster[rIdx].rank = newRank;
@@ -554,9 +587,14 @@ async function handleApi(req, res) {
           roster.roster[rIdx].activity = "Active";
           roster.roster[rIdx].vacant = false;
           roster.roster[rIdx].updatedAt = new Date().toISOString();
-          await writeJson(rosterPath, roster);
         }
       }
+
+      board.cards[cardIdx].callsign = payload.callsign;
+      board.cards[cardIdx].rank = newRank;
+      roster.updatedAt = new Date().toISOString();
+      roster.updatedBy = user.email;
+      await writeJson(rosterPath, roster);
     }
 
     // Cleared For Patrol → set clearedForPatrol flag on roster entry
