@@ -294,7 +294,18 @@ async function handleApi(req, res) {
     if (!requireEdit(user, res)) return;
     const id = decodeURIComponent(url.pathname.split("/").pop());
     const data = await readJson(rosterPath);
-    data.roster = data.roster.filter((entry) => entry.id !== id);
+    const idx = data.roster.findIndex((e) => e.id === id);
+    if (idx !== -1) {
+      // Vacate the slot so the callsign stays available — don't delete the entry
+      data.roster[idx].name = "";
+      data.roster[idx].activity = "Vacant";
+      data.roster[idx].vacant = true;
+      data.roster[idx].notes = "";
+      data.roster[idx].employeeNotes = "";
+      data.roster[idx].clearedForPatrol = false;
+      data.roster[idx].promotionDate = "";
+      data.roster[idx].updatedAt = new Date().toISOString();
+    }
     data.updatedAt = new Date().toISOString();
     data.updatedBy = user.email;
     await writeJson(rosterPath, data);
@@ -493,10 +504,20 @@ async function handleApi(req, res) {
 
     const card = board.cards[cardIdx];
 
-    // Remove roster entry if linked
+    // Vacate the roster entry so the callsign stays available
     if (card.rosterId) {
       const roster = await readJson(rosterPath);
-      roster.roster = roster.roster.filter((e) => e.id !== card.rosterId);
+      const rIdx = roster.roster.findIndex((e) => e.id === card.rosterId);
+      if (rIdx !== -1) {
+        roster.roster[rIdx].name = "";
+        roster.roster[rIdx].activity = "Vacant";
+        roster.roster[rIdx].vacant = true;
+        roster.roster[rIdx].notes = "";
+        roster.roster[rIdx].employeeNotes = "";
+        roster.roster[rIdx].clearedForPatrol = false;
+        roster.roster[rIdx].promotionDate = "";
+        roster.roster[rIdx].updatedAt = new Date().toISOString();
+      }
       roster.updatedAt = new Date().toISOString();
       roster.updatedBy = user.email;
       await writeJson(rosterPath, roster);
