@@ -174,6 +174,28 @@
         </div>
       </section>
 
+      <!-- Academy Passed modal -->
+      <div id="academyPassedModal" class="modal-overlay hidden">
+        <div class="modal">
+          <h3>Academy Passed</h3>
+          <p>Assign a rank and callsign for this recruit. Their roster entry will be updated immediately.</p>
+          <div class="form-grid" style="margin-top:8px">
+            <label>
+              <span>Rank</span>
+              <select id="academyRankPicker"></select>
+            </label>
+            <label>
+              <span>Callsign</span>
+              <input id="academyCallsignInput" placeholder="e.g. 501">
+            </label>
+          </div>
+          <div class="button-row" style="margin-top:4px">
+            <button id="academyConfirmBtn">Confirm Promotion</button>
+            <button id="academyCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Terminate confirmation modal -->
       <div id="terminateModal" class="modal-overlay hidden">
         <div class="modal">

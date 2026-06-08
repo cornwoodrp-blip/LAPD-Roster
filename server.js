@@ -542,13 +542,14 @@ async function handleApi(req, res) {
 
     // Academy Passed → promote to Probationary Officer with assigned callsign
     if (payload.stage === "Academy Passed" && payload.callsign) {
+      const newRank = String(payload.rank || "Probationary Officer").trim();
       board.cards[cardIdx].callsign = payload.callsign;
-      board.cards[cardIdx].rank = "Probationary Officer";
+      board.cards[cardIdx].rank = newRank;
       if (board.cards[cardIdx].rosterId) {
         const roster = await readJson(rosterPath);
         const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);
         if (rIdx !== -1) {
-          roster.roster[rIdx].rank = "Probationary Officer";
+          roster.roster[rIdx].rank = newRank;
           roster.roster[rIdx].callsign = payload.callsign;
           roster.roster[rIdx].activity = "Active";
           roster.roster[rIdx].vacant = false;

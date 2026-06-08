@@ -9,6 +9,7 @@ let users = [];
 let applications = [];
 let onboardingCards = [];
 let pendingTerminationId = null;
+let pendingAcademyCardId = null;
 let activeCategoryFilter = "";
 let entryListQuery = "";
 
@@ -605,39 +606,48 @@ function renderKanban() {
       zone.classList.remove("drag-over");
       const cardId = e.dataTransfer.getData("text/plain");
       const targetStage = zone.dataset.stage;
-      // Don't re-drop on same stage
       const card = onboardingCards.find((c) => c.id === cardId);
       if (!card || card.stage === targetStage) return;
+
+      if (targetStage === "Academy Passed") {
+        pendingAcademyCardId = cardId;
+        populateAcademyRankDropdown();
+        $("#academyCallsignInput").value = card.callsign || "";
+        $("#academyPassedModal").classList.remove("hidden");
+        $("#academyCallsignInput").focus();
+        return;
+      }
+
       await moveOnboardingCard(cardId, targetStage);
     });
   });
 }
 
-async function moveOnboardingCard(cardId, stage) {
-  const body = { stage };
-
-  if (stage === "Academy Passed") {
-    const callsign = prompt(
-      "Assign a Probationary Officer callsign for this recruit:\n(They will be promoted to Probationary Officer on the roster)"
-    );
-    if (callsign === null) return; // cancelled
-    if (!callsign.trim()) { toast("Callsign required to advance to Academy Passed."); return; }
-    body.callsign = callsign.trim();
-  }
-
+async function moveOnboardingCard(cardId, stage, extra = {}) {
   try {
     await api(`/api/onboarding/${encodeURIComponent(cardId)}`, {
       method: "PUT",
-      body: JSON.stringify(body)
+      body: JSON.stringify({ stage, ...extra })
     });
     await loadOnboarding();
     if (stage === "Cleared For Patrol" || stage === "Academy Passed") {
-      await loadRoster(); // refresh public roster for checkmark / rank update
+      await loadRoster();
     }
     toast(`Moved to "${stage}"`);
   } catch (err) {
     toast(err.message);
   }
+}
+
+function populateAcademyRankDropdown() {
+  $("#academyRankPicker").innerHTML = rankCategories
+    .map(
+      (cat) => `<optgroup label="${escapeHtml(cat.name)}">${cat.ranks
+        .map((r) => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`)
+        .join("")}</optgroup>`
+    )
+    .join("");
+  $("#academyRankPicker").value = "Probationary Officer";
 }
 
 function userToForm(user = {}) {
@@ -709,6 +719,29 @@ function wireEvents() {
   });
 
   $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
+
+  $("#academyConfirmBtn").addEventListener("click", async () => {
+    if (!pendingAcademyCardId) return;
+    const callsign = $("#academyCallsignInput").value.trim();
+    if (!callsign) { toast("Callsign is required."); return; }
+    const rank = $("#academyRankPicker").value;
+    const id = pendingAcademyCardId;
+    pendingAcademyCardId = null;
+    $("#academyPassedModal").classList.add("hidden");
+    await moveOnboardingCard(id, "Academy Passed", { callsign, rank });
+  });
+
+  $("#academyCancelBtn").addEventListener("click", () => {
+    pendingAcademyCardId = null;
+    $("#academyPassedModal").classList.add("hidden");
+  });
+
+  $("#academyPassedModal").addEventListener("click", (e) => {
+    if (e.target === $("#academyPassedModal")) {
+      pendingAcademyCardId = null;
+      $("#academyPassedModal").classList.add("hidden");
+    }
+  });
 
   $("#terminateConfirmBtn").addEventListener("click", async () => {
     if (!pendingTerminationId) return;
