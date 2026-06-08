@@ -612,9 +612,7 @@ function renderKanban() {
       if (targetStage === "Academy Passed") {
         pendingAcademyCardId = cardId;
         populateAcademyRankDropdown();
-        $("#academyCallsignInput").value = card.callsign || "";
         $("#academyPassedModal").classList.remove("hidden");
-        $("#academyCallsignInput").focus();
         return;
       }
 
@@ -648,6 +646,20 @@ function populateAcademyRankDropdown() {
     )
     .join("");
   $("#academyRankPicker").value = "Probationary Officer";
+  populateAcademyCallsigns("Probationary Officer");
+}
+
+function populateAcademyCallsigns(rank) {
+  const picker = $("#academyCallsignPicker");
+  const vacant = rosterData.roster.filter(
+    (e) => (e.vacant || e.activity === "Vacant") && cleanRank(e.rank) === cleanRank(rank)
+  );
+  picker.innerHTML = vacant.length
+    ? [
+        `<option value="">— Select callsign —</option>`,
+        ...vacant.map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`)
+      ].join("")
+    : `<option value="">No vacant slots for this rank</option>`;
 }
 
 function userToForm(user = {}) {
@@ -720,10 +732,14 @@ function wireEvents() {
 
   $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
 
+  $("#academyRankPicker").addEventListener("change", () => {
+    populateAcademyCallsigns($("#academyRankPicker").value);
+  });
+
   $("#academyConfirmBtn").addEventListener("click", async () => {
     if (!pendingAcademyCardId) return;
-    const callsign = $("#academyCallsignInput").value.trim();
-    if (!callsign) { toast("Callsign is required."); return; }
+    const callsign = $("#academyCallsignPicker").value;
+    if (!callsign) { toast("Please select a callsign."); return; }
     const rank = $("#academyRankPicker").value;
     const id = pendingAcademyCardId;
     pendingAcademyCardId = null;
