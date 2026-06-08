@@ -145,6 +145,7 @@
               <tr>
                 <th>Callsign</th>
                 <th>Name</th>
+                <th>Discord</th>
                 <th>Activity</th>
                 <th>Rank</th>
                 <th>Divisions</th>
@@ -188,10 +189,10 @@
               <h3 id="entryFormTitle">Edit roster entry</h3>
               <input type="hidden" name="id">
               <div class="form-grid">
-                <label><span>Callsign</span><input name="callsign"></label>
+                <label><span>Callsign</span><select name="callsign" id="callsignPicker"></select></label>
                 <label><span>Name</span><input name="name"></label>
-                <label><span>Activity</span><input name="activity"></label>
-                <label><span>Rank</span><input name="rank"></label>
+                <label><span>Rank</span><select name="rank" id="rankPicker"></select></label>
+                <label><span>Activity</span><select name="activity" id="activityPicker"></select></label>
                 <label><span>Promotion date</span><input name="promotionDate" type="date"></label>
               </div>
               <fieldset>
@@ -202,7 +203,8 @@
                 <legend>Strikes</legend>
                 <div class="checks" id="strikeChecks"></div>
               </fieldset>
-              <label><span>Notes</span><textarea name="notes" rows="3"></textarea></label>
+              <label><span>Discord</span><textarea name="notes" rows="2"></textarea></label>
+              <label><span>Employee Notes <em style="font-style:normal;color:var(--gold);font-size:10px;letter-spacing:.5px">(INTERNAL ONLY)</em></span><textarea name="employeeNotes" rows="3"></textarea></label>
               <label class="checkbox"><input name="vacant" type="checkbox"> Vacant slot</label>
               <div class="button-row">
                 <button type="submit">Save entry</button>

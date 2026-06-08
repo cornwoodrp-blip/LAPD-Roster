@@ -150,7 +150,7 @@ function renderRosterTable() {
     .map(([category, entries]) => {
       const filled = entries.filter((entry) => entry.activity !== "Vacant" && !entry.vacant).length;
       const categoryRow = `<tr class="category-row">
-        <td colspan="8">
+        <td colspan="9">
           <div>
             <strong>${escapeHtml(category)}</strong>
             <span>${entries.length} slots / ${filled} filled</span>
@@ -167,6 +167,7 @@ function renderRosterTable() {
           return `<tr>
         <td>${escapeHtml(entry.callsign || "-")}</td>
         <td>${escapeHtml(entry.name || "Vacant")}</td>
+        <td>${isVacant ? "" : escapeHtml(entry.notes || "-")}</td>
         <td class="${statusClass(entry.activity)}">${escapeHtml(entry.activity || "Vacant")}</td>
         <td>${escapeHtml(entry.rank || "-")}</td>
         <td><span class="pill-row">${isVacant ? "" : renderPills(divisionPills)}</span></td>
@@ -187,7 +188,7 @@ function renderPills(items) {
 }
 
 function renderEntryList() {
-  let rows = rosterData.roster;
+  let rows = rosterData.roster.filter((entry) => !entry.vacant && entry.activity !== "Vacant");
   if (entryListQuery) {
     const q = normalize(entryListQuery);
     rows = rows.filter((entry) =>
@@ -199,12 +200,12 @@ function renderEntryList() {
         .map(
           (entry) => `<button class="mini-item ${entry.id === selectedEntryId ? "active" : ""}" data-entry-id="${entry.id}">
         <strong>${escapeHtml(entry.callsign || "-")}</strong>
-        <span>${escapeHtml(entry.name || "Vacant")}<br><small>${escapeHtml(entry.rank || "-")}</small></span>
-        <small>${escapeHtml(entry.activity || "Vacant")}</small>
+        <span>${escapeHtml(entry.name || "-")}<br><small>${escapeHtml(entry.rank || "-")}</small></span>
+        <small>${escapeHtml(entry.activity || "-")}</small>
       </button>`
         )
         .join("")
-    : `<div class="empty-state">No entries match.</div>`;
+    : `<div class="empty-state">No active entries match.</div>`;
 }
 
 function renderCategoryOverview() {
@@ -223,6 +224,7 @@ function renderCategoryOverview() {
 
 function renderAll() {
   fillChecks();
+  fillEntrySelects();
   renderSummary();
   renderCategoryOverview();
   renderFilters();
@@ -295,6 +297,8 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+const activityOptions = ["Active", "LOA", "M-LOA", "Semi-Active", "Inactive", "Vacant"];
+
 function fillChecks() {
   $("#divisionChecks").innerHTML = divisions
     .map((division) => `<label class="checkbox"><input type="checkbox" name="division_${division}"> ${division}</label>`)
@@ -304,16 +308,51 @@ function fillChecks() {
     .join("");
 }
 
+function fillEntrySelects() {
+  // Activity dropdown
+  $("#activityPicker").innerHTML = activityOptions
+    .map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`)
+    .join("");
+
+  // Rank dropdown (grouped by category)
+  $("#rankPicker").innerHTML = rankCategories
+    .map(
+      (cat) => `<optgroup label="${escapeHtml(cat.name)}">${cat.ranks
+        .map((r) => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`)
+        .join("")}</optgroup>`
+    )
+    .join("");
+
+  // Callsign dropdown (all from roster)
+  const callsigns = [...new Set(rosterData.roster.map((e) => e.callsign).filter(Boolean))].sort();
+  $("#callsignPicker").innerHTML = [
+    `<option value="">— New callsign —</option>`,
+    ...callsigns.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+  ].join("");
+}
+
 function entryToForm(entry) {
   const form = $("#entryForm");
   const fields = form.elements;
   fields.id.value = entry?.id || "";
-  fields.callsign.value = entry?.callsign || "";
+
+  // Callsign — ensure the option exists (handles new entries not yet in dropdown)
+  const callsignVal = entry?.callsign || "";
+  const callsignPicker = $("#callsignPicker");
+  if (callsignVal && !callsignPicker.querySelector(`option[value="${callsignVal.replace(/"/g, '\\"')}"]`)) {
+    const opt = document.createElement("option");
+    opt.value = callsignVal;
+    opt.textContent = callsignVal;
+    callsignPicker.prepend(opt);
+  }
+  fields.callsign.value = callsignVal;
+
   fields.name.value = entry?.name || "";
-  fields.activity.value = entry?.activity || "";
   fields.rank.value = entry?.rank || "";
+  fields.activity.value = entry?.activity || "";
   fields.promotionDate.value = toDateInputValue(entry?.promotionDate || "");
   fields.notes.value = entry?.notes || "";
+  fields.employeeNotes.value = entry?.employeeNotes || "";
   fields.vacant.checked = Boolean(entry?.vacant);
   divisions.forEach((division) => {
     fields[`division_${division}`].checked = Boolean(entry?.divisions?.[division]);
@@ -403,6 +442,7 @@ function formToEntry() {
     rank: fields.rank.value,
     promotionDate: fields.promotionDate.value,
     notes: fields.notes.value,
+    employeeNotes: fields.employeeNotes.value,
     vacant: fields.vacant.checked,
     divisions: Object.fromEntries(divisions.map((division) => [division, fields[`division_${division}`].checked])),
     strikes: Object.fromEntries(strikes.map((strike) => [strike, fields[`strike_${strike}`].checked]))
@@ -421,9 +461,8 @@ function setDashboardState() {
   $("#editNotice").textContent = sessionUser.canEditRoster
     ? "Changes save to data/roster.json immediately."
     : "Your account can view the dashboard but cannot edit roster entries.";
-  $$("#entryForm input, #entryForm textarea, #entryForm button").forEach((control) => {
-    if (control.id === "newEntryButton") control.disabled = !sessionUser.canEditRoster;
-    else control.disabled = !sessionUser.canEditRoster;
+  $$("#entryForm input, #entryForm textarea, #entryForm select, #entryForm button").forEach((control) => {
+    control.disabled = !sessionUser.canEditRoster;
   });
 }
 
