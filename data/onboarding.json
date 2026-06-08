@@ -1,28 +1,18 @@
 {
   "cards": [
     {
-      "id": "d9abfa6c-41f1-4b6d-a6cd-f06f0ff3742b",
-      "name": "dfdfd",
-      "discord": "dfdfd",
-      "applicationId": "d9abfa6c-41f1-4b6d-a6cd-f06f0ff3742b",
-      "rosterId": "620-236",
-      "stage": "Application Accepted",
-      "createdAt": "2026-06-08T13:38:30.294Z",
-      "callsign": "620",
-      "rank": "Recruit",
-      "acceptedBy": "Cornwood Admin"
-    },
-    {
       "id": "0d33c294-7e33-4adf-8241-747aee770a5c",
       "name": "Test Character",
       "discord": "2343",
       "applicationId": "0d33c294-7e33-4adf-8241-747aee770a5c",
       "rosterId": "619-235",
-      "stage": "Application Accepted",
+      "stage": "Academy Passed",
       "createdAt": "2026-06-08T13:38:08.188Z",
-      "callsign": "619",
-      "rank": "Recruit",
-      "acceptedBy": "Cornwood Admin"
+      "callsign": "503",
+      "rank": "Probationary Officer",
+      "acceptedBy": "Cornwood Admin",
+      "movedBy": "Richard Longdonger",
+      "movedAt": "2026-06-08T14:03:03.015Z"
     }
   ]
 }

@@ -1,3 +1,38 @@
 {
-  "applications": []
+  "applications": [
+    {
+      "id": "d9abfa6c-41f1-4b6d-a6cd-f06f0ff3742b",
+      "name": "dfdfd",
+      "discord": "dfdfd",
+      "age": "31",
+      "factionCharacter": "no",
+      "roleplayPhilosophy": "dsdsdsd",
+      "characterDescription": "sdsdsdsds",
+      "leoExperience": "sdsdsdsds",
+      "bannedHistory": "sdsdsds",
+      "clips": "",
+      "status": "rejected",
+      "submittedAt": "2026-06-08T13:38:30.293Z",
+      "reviewedAt": "2026-06-08T13:53:29.320Z",
+      "reviewedBy": "cornwoodrp@gmail.com",
+      "rosterEntryId": "620-236"
+    },
+    {
+      "id": "0d33c294-7e33-4adf-8241-747aee770a5c",
+      "name": "Test Character",
+      "discord": "2343",
+      "age": "21",
+      "factionCharacter": "no",
+      "roleplayPhilosophy": "dfdfd",
+      "characterDescription": "dfdfd",
+      "leoExperience": "dfdf",
+      "bannedHistory": "dfdfd",
+      "clips": "ddd",
+      "status": "accepted",
+      "submittedAt": "2026-06-08T13:38:08.186Z",
+      "reviewedAt": "2026-06-08T13:39:52.502Z",
+      "reviewedBy": "cornwoodrp@gmail.com",
+      "rosterEntryId": "619-235"
+    }
+  ]
 }
