@@ -114,11 +114,25 @@ function groupedRoster(rows) {
   return [...buckets.entries()].filter(([, entries]) => entries.length);
 }
 
+function deduplicatedRoster() {
+  const seen = new Map();
+  for (const entry of rosterData.roster) {
+    const cs = String(entry.callsign || "").trim();
+    if (!cs) { seen.set(entry.id, entry); continue; }
+    if (!seen.has(cs)) { seen.set(cs, entry); continue; }
+    const prev = seen.get(cs);
+    const prevVacant = prev.vacant || prev.activity === "Vacant" || !prev.name;
+    const thisVacant = entry.vacant || entry.activity === "Vacant" || !entry.name;
+    if (prevVacant && !thisVacant) seen.set(cs, entry); // prefer active
+  }
+  return [...seen.values()];
+}
+
 function filteredRoster() {
   const query = normalize($("#searchInput").value);
   const activity = $("#activityFilter").value;
   const rank = $("#rankFilter").value;
-  return rosterData.roster.filter((entry) => {
+  return deduplicatedRoster().filter((entry) => {
     const haystack = normalize([
       entry.callsign,
       entry.name,

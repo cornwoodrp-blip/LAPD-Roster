@@ -493,31 +493,6 @@
       "vacant": true
     },
     {
-      "id": "213-22",
-      "callsign": "213",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Staff Sergeant DCI",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
       "id": "215-23",
       "callsign": "215",
       "name": "B. Malone",
@@ -1618,31 +1593,6 @@
       "vacant": true
     },
     {
-      "id": "364-67",
-      "callsign": "364",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Sr. Officer",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
       "id": "365-68",
       "callsign": "365",
       "name": "",
@@ -2394,381 +2344,6 @@
     },
     {
       "id": "426-98",
-      "callsign": "426",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "411-99",
-      "callsign": "411",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "412-100",
-      "callsign": "412",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "413-101",
-      "callsign": "413",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "414-102",
-      "callsign": "414",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "415-103",
-      "callsign": "415",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "416-104",
-      "callsign": "416",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "417-105",
-      "callsign": "417",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "418-106",
-      "callsign": "418",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "419-107",
-      "callsign": "419",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "421-108",
-      "callsign": "421",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "422-109",
-      "callsign": "422",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "423-110",
-      "callsign": "423",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "424-111",
-      "callsign": "424",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "425-112",
-      "callsign": "425",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Officer II",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "426-113",
       "callsign": "426",
       "name": "",
       "activity": "Vacant",
@@ -3993,31 +3568,6 @@
       "tig": "0",
       "vacant": false,
       "clearedForPatrol": true
-    },
-    {
-      "id": "503-162",
-      "callsign": "503",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Probationary Officer",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
     },
     {
       "id": "504-163",
@@ -5824,10 +5374,10 @@
     },
     {
       "id": "619-235",
-      "callsign": "619",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Recruit",
+      "callsign": "503",
+      "name": "Test Character",
+      "activity": "Active",
+      "rank": "Probationary Officer",
       "divisions": {
         "Canine": false,
         "DCI": false,
@@ -5842,35 +5392,13 @@
         "2": false,
         "3": false
       },
-      "notes": "",
-      "promotionDate": "",
+      "notes": "discord: 2343 | leo exp: dfdf",
+      "employeeNotes": "",
+      "promotionDate": "2026-06-08",
       "tig": "",
-      "vacant": true
-    },
-    {
-      "id": "620-236",
-      "callsign": "620",
-      "name": "",
-      "activity": "Vacant",
-      "rank": "Recruit",
-      "divisions": {
-        "Canine": false,
-        "DCI": false,
-        "TEU": false,
-        "AIR-1": false,
-        "S.E.R.T": false,
-        "CFR": false,
-        "TBD": false
-      },
-      "strikes": {
-        "1": false,
-        "2": false,
-        "3": false
-      },
-      "notes": "",
-      "promotionDate": "",
-      "tig": "",
-      "vacant": true
+      "vacant": false,
+      "clearedForPatrol": false,
+      "updatedAt": "2026-06-08T14:03:03.016Z"
     },
     {
       "id": "621-237",
@@ -7248,6 +6776,6 @@
       "vacant": true
     }
   ],
-  "updatedAt": "2026-06-08T13:08:57.813Z",
+  "updatedAt": "2026-06-08T13:53:29.317Z",
   "updatedBy": "cornwoodrp@gmail.com"
 }
