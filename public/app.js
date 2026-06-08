@@ -10,6 +10,7 @@ let applications = [];
 let onboardingCards = [];
 let pendingTerminationId = null;
 let pendingAcademyCardId = null;
+let pendingClearForPatrolId = null;
 let activeCategoryFilter = "";
 let entryListQuery = "";
 
@@ -391,6 +392,7 @@ function entryToForm(entry) {
   fields.notes.value = entry?.notes || "";
   fields.employeeNotes.value = entry?.employeeNotes || "";
   fields.vacant.checked = Boolean(entry?.vacant);
+  fields.clearedForPatrol.checked = Boolean(entry?.clearedForPatrol);
   divisions.forEach((division) => {
     fields[`division_${division}`].checked = Boolean(entry?.divisions?.[division]);
   });
@@ -481,6 +483,7 @@ function formToEntry() {
     notes: fields.notes.value,
     employeeNotes: fields.employeeNotes.value,
     vacant: fields.vacant.checked,
+    clearedForPatrol: fields.clearedForPatrol.checked,
     divisions: Object.fromEntries(divisions.map((division) => [division, fields[`division_${division}`].checked])),
     strikes: Object.fromEntries(strikes.map((strike) => [strike, fields[`strike_${strike}`].checked]))
   };
@@ -638,6 +641,13 @@ function renderKanban() {
         pendingAcademyCardId = cardId;
         populateAcademyRankDropdown();
         $("#academyPassedModal").classList.remove("hidden");
+        return;
+      }
+
+      if (targetStage === "Cleared For Patrol") {
+        pendingClearForPatrolId = cardId;
+        $("#clearForPatrolName").textContent = card.name || "this recruit";
+        $("#clearForPatrolModal").classList.remove("hidden");
         return;
       }
 
@@ -807,6 +817,26 @@ function wireEvents() {
     if (e.target === $("#terminateModal")) {
       pendingTerminationId = null;
       $("#terminateModal").classList.add("hidden");
+    }
+  });
+
+  $("#clearForPatrolConfirmBtn").addEventListener("click", async () => {
+    if (!pendingClearForPatrolId) return;
+    const id = pendingClearForPatrolId;
+    pendingClearForPatrolId = null;
+    $("#clearForPatrolModal").classList.add("hidden");
+    await moveOnboardingCard(id, "Cleared For Patrol");
+  });
+
+  $("#clearForPatrolCancelBtn").addEventListener("click", () => {
+    pendingClearForPatrolId = null;
+    $("#clearForPatrolModal").classList.add("hidden");
+  });
+
+  $("#clearForPatrolModal").addEventListener("click", (e) => {
+    if (e.target === $("#clearForPatrolModal")) {
+      pendingClearForPatrolId = null;
+      $("#clearForPatrolModal").classList.add("hidden");
     }
   });
 

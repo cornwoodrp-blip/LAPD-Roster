@@ -200,6 +200,19 @@
         </div>
       </div>
 
+      <!-- Cleared For Patrol confirmation modal -->
+      <div id="clearForPatrolModal" class="modal-overlay hidden">
+        <div class="modal">
+          <h3>Clear For Patrol</h3>
+          <p>Are you sure you want to clear <strong id="clearForPatrolName"></strong> for patrol?</p>
+          <p class="notice">This will display a gold checkmark on the public roster.</p>
+          <div class="button-row">
+            <button id="clearForPatrolConfirmBtn">Yes, Clear For Patrol</button>
+            <button id="clearForPatrolCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Terminate confirmation modal -->
       <div id="terminateModal" class="modal-overlay hidden">
         <div class="modal">
@@ -259,7 +272,10 @@
               </fieldset>
               <label><span>Discord</span><textarea name="notes" rows="2"></textarea></label>
               <label><span>Employee Notes <em style="font-style:normal;color:var(--gold);font-size:10px;letter-spacing:.5px">(INTERNAL ONLY)</em></span><textarea name="employeeNotes" rows="3"></textarea></label>
-              <label class="checkbox"><input name="vacant" type="checkbox"> Vacant slot</label>
+              <div style="display:flex;gap:20px;flex-wrap:wrap">
+                <label class="checkbox"><input name="vacant" type="checkbox"> Vacant slot</label>
+                <label class="checkbox"><input name="clearedForPatrol" type="checkbox"> Cleared for patrol</label>
+              </div>
               <div class="button-row">
                 <button type="submit">Save entry</button>
                 <button id="newEntryButton" type="button" class="secondary">New entry</button>
