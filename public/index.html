@@ -169,7 +169,23 @@
           <button id="refreshOnboardingBtn" type="button" class="secondary">Refresh</button>
         </div>
         <div class="kanban-board" id="kanbanBoard"></div>
+        <div id="terminateZone" class="terminate-zone hidden">
+          <span>&#9660; DROP HERE TO TERMINATE EMPLOYEE</span>
+        </div>
       </section>
+
+      <!-- Terminate confirmation modal -->
+      <div id="terminateModal" class="modal-overlay hidden">
+        <div class="modal">
+          <h3>Terminate Employee</h3>
+          <p>Are you sure you want to terminate <strong id="terminateName"></strong>?</p>
+          <p class="notice">This will permanently remove them from the roster and the onboarding pipeline.</p>
+          <div class="button-row">
+            <button id="terminateConfirmBtn" class="danger">Yes, Terminate</button>
+            <button id="terminateCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
 
       <section id="dashboardView" class="view hidden">
         <div id="authPanel" class="auth-panel">

@@ -8,6 +8,7 @@ let selectedApplicationId = null;
 let users = [];
 let applications = [];
 let onboardingCards = [];
+let pendingTerminationId = null;
 let activeCategoryFilter = "";
 let entryListQuery = "";
 
@@ -564,8 +565,32 @@ function renderKanban() {
     card.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", card.dataset.cardId);
       card.classList.add("dragging");
+      $("#terminateZone").classList.remove("hidden");
     });
-    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      $("#terminateZone").classList.add("hidden");
+      $("#terminateZone").classList.remove("drag-over");
+    });
+  });
+
+  // Terminate drop zone
+  const terminateZone = $("#terminateZone");
+  terminateZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    terminateZone.classList.add("drag-over");
+  });
+  terminateZone.addEventListener("dragleave", () => terminateZone.classList.remove("drag-over"));
+  terminateZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    terminateZone.classList.remove("drag-over");
+    terminateZone.classList.add("hidden");
+    const cardId = e.dataTransfer.getData("text/plain");
+    const card = onboardingCards.find((c) => c.id === cardId);
+    if (!card) return;
+    pendingTerminationId = cardId;
+    $("#terminateName").textContent = card.name;
+    $("#terminateModal").classList.remove("hidden");
   });
 
   // Drop zones
@@ -684,6 +709,34 @@ function wireEvents() {
   });
 
   $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
+
+  $("#terminateConfirmBtn").addEventListener("click", async () => {
+    if (!pendingTerminationId) return;
+    const id = pendingTerminationId;
+    pendingTerminationId = null;
+    $("#terminateModal").classList.add("hidden");
+    try {
+      await api(`/api/onboarding/${encodeURIComponent(id)}`, { method: "DELETE" });
+      await loadRoster();
+      await loadOnboarding();
+      if (sessionUser?.canEditRoster) await loadApplications();
+      toast("Employee terminated and removed from roster.");
+    } catch (err) {
+      toast(err.message);
+    }
+  });
+
+  $("#terminateCancelBtn").addEventListener("click", () => {
+    pendingTerminationId = null;
+    $("#terminateModal").classList.add("hidden");
+  });
+
+  $("#terminateModal").addEventListener("click", (e) => {
+    if (e.target === $("#terminateModal")) {
+      pendingTerminationId = null;
+      $("#terminateModal").classList.add("hidden");
+    }
+  });
 
   $("#applyAgainButton").addEventListener("click", () => {
     localStorage.removeItem("pd_application_id");

@@ -484,6 +484,43 @@ async function handleApi(req, res) {
     return;
   }
 
+  if (req.method === "DELETE" && url.pathname.match(/^\/api\/onboarding\/[^/]+$/)) {
+    if (!requireOnboard(user, res)) return;
+    const cardId = decodeURIComponent(url.pathname.split("/").pop());
+    const board = await readJson(onboardingPath);
+    const cardIdx = board.cards.findIndex((c) => c.id === cardId);
+    if (cardIdx === -1) { send(res, 404, { error: "Card not found." }); return; }
+
+    const card = board.cards[cardIdx];
+
+    // Remove roster entry if linked
+    if (card.rosterId) {
+      const roster = await readJson(rosterPath);
+      roster.roster = roster.roster.filter((e) => e.id !== card.rosterId);
+      roster.updatedAt = new Date().toISOString();
+      roster.updatedBy = user.email;
+      await writeJson(rosterPath, roster);
+    }
+
+    // Mark application as terminated
+    if (card.applicationId) {
+      const apps = await readJson(applicationsPath);
+      const appIdx = apps.applications.findIndex((a) => a.id === card.applicationId);
+      if (appIdx !== -1) {
+        apps.applications[appIdx].status = "rejected";
+        apps.applications[appIdx].reviewedAt = new Date().toISOString();
+        apps.applications[appIdx].reviewedBy = user.email;
+        await writeJson(applicationsPath, apps);
+      }
+    }
+
+    // Remove card from board
+    board.cards.splice(cardIdx, 1);
+    await writeJson(onboardingPath, board);
+    send(res, 200, { ok: true });
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/onboarding") {
     if (!requireOnboard(user, res)) return;
     const board = await readJson(onboardingPath);

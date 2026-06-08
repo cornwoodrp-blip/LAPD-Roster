@@ -810,6 +810,69 @@ legend {
   padding-top: 5px;
 }
 
+/* ── Terminate drop zone ── */
+
+.terminate-zone {
+  align-items: center;
+  border: 2px dashed #7a1a1a;
+  border-radius: 6px;
+  color: #c04040;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  height: 72px;
+  justify-content: center;
+  letter-spacing: 1.5px;
+  margin-top: 10px;
+  text-transform: uppercase;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+
+.terminate-zone.drag-over {
+  background: #3a0a0a;
+  border-color: #e03030;
+  color: #ff5555;
+}
+
+/* ── Modal ── */
+
+.modal-overlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.75);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--red);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 480px;
+  padding: 28px;
+  width: 90%;
+}
+
+.modal h3 {
+  color: var(--red);
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.modal p {
+  color: var(--ink);
+  margin: 0;
+}
+
 /* ── Toast ── */
 
 .toast {
