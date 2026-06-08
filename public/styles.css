@@ -181,11 +181,29 @@ button:disabled {
 /* ── Roster filters ── */
 
 .toolbar {
-  align-items: end;
+  align-items: center;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(240px, 1fr) 180px 220px;
+  grid-template-columns: minmax(240px, 1fr) 180px 220px auto;
   margin-bottom: 14px;
+}
+.toolbar-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+.toolbar-checkbox span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.toolbar-checkbox input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--gold);
+  cursor: pointer;
 }
 
 .category-overview {

@@ -132,7 +132,10 @@ function filteredRoster() {
   const query = normalize($("#searchInput").value);
   const activity = $("#activityFilter").value;
   const rank = $("#rankFilter").value;
+  const hideVacant = $("#hideVacantToggle")?.checked ?? true;
   return deduplicatedRoster().filter((entry) => {
+    const isVacant = entry.vacant || entry.activity === "Vacant" || !entry.name;
+    if (hideVacant && isVacant) return false;
     const haystack = normalize([
       entry.callsign,
       entry.name,
@@ -891,6 +894,12 @@ function wireEvents() {
       renderRosterTable();
       renderEntryList();
     });
+  });
+
+  $("#hideVacantToggle").addEventListener("change", () => {
+    activeCategoryFilter = "";
+    $$(".category-card").forEach((card) => card.classList.remove("active"));
+    renderRosterTable();
   });
 
   $("#categoryOverview").addEventListener("click", (event) => {
