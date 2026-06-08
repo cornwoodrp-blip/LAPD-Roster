@@ -955,6 +955,7 @@ function wireEvents() {
       setDashboardState();
       if (sessionUser.canEditRoster) await loadApplications();
       if (sessionUser.canManageUsers) await loadUsers();
+      if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
       toast("Signed in.");
     } catch (error) {
       toast(error.message);

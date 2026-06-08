@@ -71,6 +71,12 @@ async function currentUser(req) {
 function publicUser(user) {
   if (!user) return null;
   const { password, ...safe } = user;
+  // Admins always get all permissions regardless of what's stored in the file
+  if (safe.role === "admin") {
+    safe.canEditRoster = true;
+    safe.canManageUsers = true;
+    safe.canOnboard = true;
+  }
   return safe;
 }
 
