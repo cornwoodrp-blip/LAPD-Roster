@@ -8,6 +8,7 @@ let selectedApplicationId = null;
 let users = [];
 let applications = [];
 let activeCategoryFilter = "";
+let entryListQuery = "";
 
 const rankCategories = [
   {
@@ -186,16 +187,24 @@ function renderPills(items) {
 }
 
 function renderEntryList() {
-  const rows = filteredRoster();
-  $("#entryList").innerHTML = rows
-    .map(
-      (entry) => `<button class="mini-item ${entry.id === selectedEntryId ? "active" : ""}" data-entry-id="${entry.id}">
+  let rows = rosterData.roster;
+  if (entryListQuery) {
+    const q = normalize(entryListQuery);
+    rows = rows.filter((entry) =>
+      normalize([entry.callsign, entry.name, entry.rank, entry.activity].join(" ")).includes(q)
+    );
+  }
+  $("#entryList").innerHTML = rows.length
+    ? rows
+        .map(
+          (entry) => `<button class="mini-item ${entry.id === selectedEntryId ? "active" : ""}" data-entry-id="${entry.id}">
         <strong>${escapeHtml(entry.callsign || "-")}</strong>
         <span>${escapeHtml(entry.name || "Vacant")}<br><small>${escapeHtml(entry.rank || "-")}</small></span>
         <small>${escapeHtml(entry.activity || "Vacant")}</small>
       </button>`
-    )
-    .join("");
+        )
+        .join("")
+    : `<div class="empty-state">No entries match.</div>`;
 }
 
 function renderCategoryOverview() {
@@ -316,12 +325,39 @@ function entryToForm(entry) {
   $("#deleteEntryButton").disabled = !entry;
 }
 
-function populateVacantCallsigns() {
-  const vacant = rosterData.roster.filter((e) => e.vacant || e.activity === "Vacant");
-  $("#vacantCallsignPicker").innerHTML = [
-    `<option value="">— or fill callsign &amp; rank manually below —</option>`,
-    ...vacant.map((e) => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.callsign)} — ${escapeHtml(e.rank || "Unknown")}</option>`)
+function populateAcceptRankDropdown() {
+  const allRanks = rankCategories.flatMap((cat) => cat.ranks);
+  $("#acceptRankPicker").innerHTML = [
+    `<option value="">— Select rank —</option>`,
+    ...rankCategories.map(
+      (cat) => `<optgroup label="${escapeHtml(cat.name)}">${cat.ranks
+        .map((r) => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`)
+        .join("")}</optgroup>`
+    )
   ].join("");
+}
+
+function populateAcceptCallsigns(rank) {
+  const picker = $("#acceptCallsignPicker");
+  if (!rank) {
+    picker.innerHTML = `<option value="">— Select rank first —</option>`;
+    picker.disabled = true;
+    return;
+  }
+  const vacant = rosterData.roster.filter(
+    (e) => (e.vacant || e.activity === "Vacant") && cleanRank(e.rank) === cleanRank(rank)
+  );
+  if (vacant.length) {
+    picker.innerHTML = [
+      `<option value="">— Select callsign —</option>`,
+      ...vacant.map(
+        (e) => `<option value="${escapeHtml(e.callsign)}" data-entry-id="${escapeHtml(e.id)}">${escapeHtml(e.callsign)}</option>`
+      )
+    ].join("");
+  } else {
+    picker.innerHTML = `<option value="">No vacant slots for this rank</option>`;
+  }
+  picker.disabled = false;
 }
 
 function applicationToAcceptForm(application) {
@@ -331,11 +367,10 @@ function applicationToAcceptForm(application) {
   fields.applicationId.value = application?.id || "";
   fields.vacantEntryId.value = "";
   fields.name.value = application?.name || "";
-  fields.callsign.value = "";
-  fields.rank.value = "Cadet";
   fields.promotionDate.value = new Date().toISOString().split("T")[0];
-  populateVacantCallsigns();
-  $("#vacantCallsignPicker").value = "";
+  populateAcceptRankDropdown();
+  $("#acceptRankPicker").value = "";
+  populateAcceptCallsigns("");
   $("#acceptFormTitle").textContent = application ? `Accept ${application.name}` : "Accept applicant";
   $("#applicationDetail").textContent = application
     ? [
@@ -351,6 +386,7 @@ function applicationToAcceptForm(application) {
     : "Select a pending application to review it.";
   $$("#acceptApplicationForm input, #acceptApplicationForm select, #acceptApplicationForm button").forEach((control) => {
     if (control.name === "name") return;
+    if (control.id === "acceptCallsignPicker") return; // managed by rank selection
     control.disabled = !application || application.status !== "pending" || !sessionUser?.canEditRoster;
   });
   renderApplications();
@@ -666,23 +702,22 @@ function wireEvents() {
 
   $("#refreshApplicationsButton").addEventListener("click", () => loadApplications());
 
-  $("#vacantCallsignPicker").addEventListener("change", (e) => {
-    const entry = rosterData.roster.find((r) => r.id === e.target.value);
-    const f = $("#acceptApplicationForm").elements;
-    if (entry) {
-      f.callsign.value = entry.callsign;
-      f.rank.value = entry.rank || "Cadet";
-      f.vacantEntryId.value = entry.id;
-    } else {
-      f.vacantEntryId.value = "";
-    }
+  $("#acceptRankPicker").addEventListener("change", () => {
+    const rank = $("#acceptRankPicker").value;
+    populateAcceptCallsigns(rank);
+    $("#acceptApplicationForm").elements.vacantEntryId.value = "";
   });
 
-  ["callsign", "rank"].forEach((name) => {
-    $("#acceptApplicationForm").elements[name].addEventListener("input", () => {
-      $("#acceptApplicationForm").elements.vacantEntryId.value = "";
-      $("#vacantCallsignPicker").value = "";
-    });
+  $("#acceptCallsignPicker").addEventListener("change", () => {
+    const select = $("#acceptCallsignPicker");
+    const selectedOption = select.options[select.selectedIndex];
+    const entryId = selectedOption?.dataset.entryId || "";
+    $("#acceptApplicationForm").elements.vacantEntryId.value = entryId;
+  });
+
+  $("#entrySearch").addEventListener("input", (e) => {
+    entryListQuery = e.target.value;
+    renderEntryList();
   });
 
   $("#applicationList").addEventListener("click", (event) => {
@@ -700,10 +735,12 @@ function wireEvents() {
     const id = fields.applicationId.value;
     if (!id) return toast("Select an application first.");
     try {
+      const callsignSelect = $("#acceptCallsignPicker");
+      const callsign = callsignSelect.value;
       const result = await api(`/api/applications/${encodeURIComponent(id)}/accept`, {
         method: "POST",
         body: JSON.stringify({
-          callsign: fields.callsign.value,
+          callsign,
           rank: fields.rank.value || "Cadet",
           promotionDate: fields.promotionDate.value,
           vacantEntryId: fields.vacantEntryId.value

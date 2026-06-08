@@ -213,7 +213,10 @@
             </form>
 
             <section class="editor-panel">
-              <h3>Entries</h3>
+              <div class="section-head">
+                <h3>Entries</h3>
+              </div>
+              <input id="entrySearch" type="search" placeholder="Search name, callsign, rank…" style="margin-bottom:8px">
               <div class="mini-list" id="entryList"></div>
             </section>
           </div>
@@ -233,15 +236,19 @@
                 <input name="applicationId" type="hidden">
                 <input name="vacantEntryId" type="hidden">
                 <label><span>Applicant</span><input name="name" disabled></label>
-                <label>
-                  <span>Vacant roster slot</span>
-                  <select id="vacantCallsignPicker">
-                    <option value="">— or fill callsign &amp; rank manually below —</option>
-                  </select>
-                </label>
                 <div class="form-grid">
-                  <label><span>Callsign</span><input name="callsign" required></label>
-                  <label><span>Rank</span><input name="rank" value="Cadet" required></label>
+                  <label>
+                    <span>Rank</span>
+                    <select name="rank" id="acceptRankPicker" required>
+                      <option value="">— Select rank —</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Callsign</span>
+                    <select name="callsign" id="acceptCallsignPicker" disabled required>
+                      <option value="">— Select rank first —</option>
+                    </select>
+                  </label>
                 </div>
                 <label><span>Promotion date</span><input name="promotionDate" type="date"></label>
                 <div class="button-row">
