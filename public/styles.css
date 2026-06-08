@@ -642,7 +642,7 @@ legend {
 .user-form {
   display: grid;
   gap: 10px;
-  grid-template-columns: 1fr 1fr 150px 130px auto auto auto auto;
+  grid-template-columns: 1fr 1fr 150px 130px auto auto auto auto auto;
 }
 
 .users .mini-item {
@@ -678,6 +678,122 @@ legend {
 .empty-state {
   color: var(--muted);
   padding: 16px;
+}
+
+/* ── Cleared for patrol badge ── */
+
+.cleared-badge {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 900;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── Kanban board ── */
+
+.kanban-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.kanban-head h2 {
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.kanban-board {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(6, minmax(200px, 1fr));
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.kanban-col {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+}
+
+.kanban-col-final {
+  border-color: var(--gold-dark);
+}
+
+.kanban-col-final .kanban-col-head {
+  color: var(--gold);
+}
+
+.kanban-col-head {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  display: flex;
+  font-size: 11px;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: 0.8px;
+  padding: 10px 12px;
+  text-transform: uppercase;
+}
+
+.kanban-count {
+  background: var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 11px;
+  padding: 1px 8px;
+}
+
+.kanban-cards {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  transition: background 100ms;
+}
+
+.kanban-cards.drag-over {
+  background: #0e2240;
+  border-radius: 0 0 6px 6px;
+}
+
+.kanban-card {
+  background: #0a1828;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  transition: border-color 100ms, opacity 100ms;
+  user-select: none;
+}
+
+.kanban-card:hover {
+  border-color: var(--gold);
+}
+
+.kanban-card.dragging {
+  opacity: 0.4;
+}
+
+.kanban-card strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.kanban-card small {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 /* ── Toast ── */

@@ -7,7 +7,8 @@
       "password": "admin123",
       "role": "admin",
       "canEditRoster": true,
-      "canManageUsers": true
+      "canManageUsers": true,
+      "canOnboard": true
     },
     {
       "id": "cornwoodrp-admin",
@@ -16,7 +17,8 @@
       "password": "Pass1234",
       "role": "admin",
       "canEditRoster": true,
-      "canManageUsers": true
+      "canManageUsers": true,
+      "canOnboard": true
     },
     {
       "id": "editor",
@@ -25,7 +27,8 @@
       "password": "editor123",
       "role": "editor",
       "canEditRoster": true,
-      "canManageUsers": false
+      "canManageUsers": false,
+      "canOnboard": false
     },
     {
       "id": "viewer",
@@ -34,7 +37,8 @@
       "password": "viewer123",
       "role": "viewer",
       "canEditRoster": false,
-      "canManageUsers": false
+      "canManageUsers": false,
+      "canOnboard": false
     }
   ]
 }

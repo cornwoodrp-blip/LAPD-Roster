@@ -19,6 +19,7 @@
         <button class="nav-button active" data-view="public">Public Roster</button>
         <button class="nav-button" data-view="apply">Applications</button>
         <button class="nav-button" data-view="dashboard">Admin Panel</button>
+        <button class="nav-button hidden" data-view="onboarding" id="onboardingNavBtn">Onboarding</button>
       </nav>
     </header>
 
@@ -159,6 +160,17 @@
         </div>
       </section>
 
+      <section id="onboardingView" class="view hidden">
+        <div class="kanban-head">
+          <div>
+            <p class="eyebrow">Onboarding Division</p>
+            <h2>Recruit Pipeline</h2>
+          </div>
+          <button id="refreshOnboardingBtn" type="button" class="secondary">Refresh</button>
+        </div>
+        <div class="kanban-board" id="kanbanBoard"></div>
+      </section>
+
       <section id="dashboardView" class="view hidden">
         <div id="authPanel" class="auth-panel">
           <form id="loginForm" class="login-form">
@@ -276,6 +288,7 @@
               </select>
               <label class="checkbox"><input name="canEditRoster" type="checkbox"> Can edit roster</label>
               <label class="checkbox"><input name="canManageUsers" type="checkbox"> Can manage users</label>
+              <label class="checkbox"><input name="canOnboard" type="checkbox"> Can onboard</label>
               <button type="submit">Save user</button>
               <button id="newUserButton" type="button" class="secondary">New user</button>
             </form>

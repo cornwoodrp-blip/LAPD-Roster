@@ -11,6 +11,7 @@ const dataDir = process.env.DATA_DIR || seedDir;
 const rosterPath = path.join(dataDir, "roster.json");
 const usersPath = path.join(dataDir, "users.json");
 const applicationsPath = path.join(dataDir, "applications.json");
+const onboardingPath = path.join(dataDir, "onboarding.json");
 const port = Number(process.env.PORT || 3000);
 const sessions = new Map();
 
@@ -19,7 +20,11 @@ const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml"
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg"
 };
 
 async function readJson(filePath) {
@@ -95,6 +100,15 @@ function requireManageUsers(user, res) {
   return true;
 }
 
+function requireOnboard(user, res) {
+  if (!requireUser(user, res)) return false;
+  if (!user.canOnboard) {
+    send(res, 403, { error: "Onboarding permission required." });
+    return false;
+  }
+  return true;
+}
+
 function sanitizeRosterEntry(input, existing = {}) {
   const divisions = input.divisions || {};
   const strikes = input.strikes || {};
@@ -109,9 +123,11 @@ function sanitizeRosterEntry(input, existing = {}) {
     divisions: Object.fromEntries(divisionKeys.map((key) => [key, Boolean(divisions[key])])),
     strikes: Object.fromEntries(strikeKeys.map((key) => [key, Boolean(strikes[key])])),
     notes: String(input.notes || "").trim(),
+    employeeNotes: String(input.employeeNotes || "").trim(),
     promotionDate: String(input.promotionDate || "").trim(),
     tig: String(input.tig || "").trim(),
-    vacant: Boolean(input.vacant)
+    vacant: Boolean(input.vacant),
+    clearedForPatrol: Boolean(input.clearedForPatrol ?? existing.clearedForPatrol)
   };
 }
 
@@ -124,7 +140,8 @@ function sanitizeUser(input, existing = {}) {
     password: String(input.password || existing.password || "changeme"),
     role: String(input.role || existing.role || "viewer").trim(),
     canEditRoster: Boolean(input.canEditRoster),
-    canManageUsers: Boolean(input.canManageUsers)
+    canManageUsers: Boolean(input.canManageUsers),
+    canOnboard: Boolean(input.canOnboard)
   };
 }
 
@@ -195,6 +212,20 @@ async function handleApi(req, res) {
     const data = await readJson(applicationsPath);
     data.applications.unshift(next);
     await writeJson(applicationsPath, data);
+
+    // Add card to onboarding board
+    const board = await readJson(onboardingPath);
+    board.cards.unshift({
+      id: next.id,
+      name: next.name,
+      discord: next.discord,
+      applicationId: next.id,
+      rosterId: "",
+      stage: "Application Pending",
+      createdAt: new Date().toISOString()
+    });
+    await writeJson(onboardingPath, board);
+
     send(res, 201, { application: next });
     return;
   }
@@ -317,6 +348,12 @@ async function handleApi(req, res) {
       reviewedBy: user.email
     }, data.applications[index]);
     await writeJson(applicationsPath, data);
+
+    // Remove from onboarding board
+    const board = await readJson(onboardingPath);
+    board.cards = board.cards.filter((c) => c.applicationId !== id);
+    await writeJson(onboardingPath, board);
+
     send(res, 200, { application: data.applications[index] });
     return;
   }
@@ -388,6 +425,16 @@ async function handleApi(req, res) {
       rosterEntryId: entry.id
     }, application);
     await writeJson(applicationsPath, applications);
+
+    // Advance onboarding card to Application Accepted
+    const board = await readJson(onboardingPath);
+    const cardIdx = board.cards.findIndex((c) => c.applicationId === id);
+    if (cardIdx !== -1) {
+      board.cards[cardIdx].stage = "Application Accepted";
+      board.cards[cardIdx].rosterId = entry.id;
+    }
+    await writeJson(onboardingPath, board);
+
     send(res, 201, { application: applications.applications[index], rosterEntry: entry });
     return;
   }
@@ -434,12 +481,64 @@ async function handleApi(req, res) {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/onboarding") {
+    if (!requireOnboard(user, res)) return;
+    const board = await readJson(onboardingPath);
+    send(res, 200, board);
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname.match(/^\/api\/onboarding\/[^/]+$/)) {
+    if (!requireOnboard(user, res)) return;
+    const cardId = decodeURIComponent(url.pathname.split("/").pop());
+    const payload = await bodyJson(req);
+    const board = await readJson(onboardingPath);
+    const cardIdx = board.cards.findIndex((c) => c.id === cardId);
+    if (cardIdx === -1) { send(res, 404, { error: "Card not found." }); return; }
+
+    board.cards[cardIdx].stage = payload.stage;
+    board.cards[cardIdx].movedBy = user.name;
+    board.cards[cardIdx].movedAt = new Date().toISOString();
+
+    // Academy Passed → promote to Probationary Officer with assigned callsign
+    if (payload.stage === "Academy Passed" && payload.callsign) {
+      board.cards[cardIdx].callsign = payload.callsign;
+      if (board.cards[cardIdx].rosterId) {
+        const roster = await readJson(rosterPath);
+        const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);
+        if (rIdx !== -1) {
+          roster.roster[rIdx].rank = "Probationary Officer";
+          roster.roster[rIdx].callsign = payload.callsign;
+          roster.roster[rIdx].activity = "Active";
+          roster.roster[rIdx].vacant = false;
+          roster.roster[rIdx].updatedAt = new Date().toISOString();
+          await writeJson(rosterPath, roster);
+        }
+      }
+    }
+
+    // Cleared For Patrol → set clearedForPatrol flag on roster entry
+    if (payload.stage === "Cleared For Patrol" && board.cards[cardIdx].rosterId) {
+      const roster = await readJson(rosterPath);
+      const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);
+      if (rIdx !== -1) {
+        roster.roster[rIdx].clearedForPatrol = true;
+        roster.roster[rIdx].updatedAt = new Date().toISOString();
+        await writeJson(rosterPath, roster);
+      }
+    }
+
+    await writeJson(onboardingPath, board);
+    send(res, 200, { card: board.cards[cardIdx] });
+    return;
+  }
+
   send(res, 404, { error: "Route not found." });
 }
 
 async function initDataDir() {
   await fs.mkdir(dataDir, { recursive: true });
-  for (const file of ["roster.json", "users.json", "applications.json"]) {
+  for (const file of ["roster.json", "users.json", "applications.json", "onboarding.json"]) {
     const dest = path.join(dataDir, file);
     const seed = path.join(seedDir, file);
     try {

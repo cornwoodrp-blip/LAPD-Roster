@@ -37,9 +37,9 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: lavell2x",
-      "promotionDate": "08/06/2025",
-      "tig": "298",
+      "notes": "lavell2x",
+      "promotionDate": "2025-08-06",
+      "tig": "",
       "vacant": false
     },
     {
@@ -62,9 +62,9 @@
         "2": false,
         "3": false
       },
-      "notes": "discord: Amineee03",
-      "promotionDate": "08/06/2025",
-      "tig": "298",
+      "notes": "Amineee03",
+      "promotionDate": "2025-08-06",
+      "tig": "",
       "vacant": false
     },
     {
@@ -388,8 +388,8 @@
         "3": false
       },
       "notes": "",
-      "promotionDate": "4/3/26",
-      "tig": "58",
+      "promotionDate": "2026-04-03",
+      "tig": "",
       "vacant": false
     },
     {
@@ -3965,7 +3965,8 @@
       "notes": "9892865",
       "promotionDate": "05/13/2026",
       "tig": "18",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": true
     },
     {
       "id": "502-161",
@@ -3990,7 +3991,8 @@
       "notes": "legacyretro",
       "promotionDate": "05/31/2026",
       "tig": "0",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": true
     },
     {
       "id": "503-162",
@@ -4040,7 +4042,8 @@
       "notes": "",
       "promotionDate": "5/9/26",
       "tig": "22",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": true
     },
     {
       "id": "505-164",
@@ -4140,7 +4143,8 @@
       "notes": "grxmey_1",
       "promotionDate": "05/09/2026",
       "tig": "#REF!",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": true
     },
     {
       "id": "509-168",
@@ -4190,7 +4194,8 @@
       "notes": "Rkta07",
       "promotionDate": "05/11/2026",
       "tig": "20",
-      "vacant": false
+      "vacant": false,
+      "clearedForPatrol": true
     },
     {
       "id": "511-170",
@@ -7243,6 +7248,6 @@
       "vacant": true
     }
   ],
-  "updatedAt": "2026-05-31T21:48:24.980Z",
-  "updatedBy": "system"
+  "updatedAt": "2026-06-08T13:08:57.813Z",
+  "updatedBy": "cornwoodrp@gmail.com"
 }

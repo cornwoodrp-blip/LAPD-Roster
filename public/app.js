@@ -7,8 +7,18 @@ let selectedEntryId = null;
 let selectedApplicationId = null;
 let users = [];
 let applications = [];
+let onboardingCards = [];
 let activeCategoryFilter = "";
 let entryListQuery = "";
+
+const onboardingStages = [
+  "Application Pending",
+  "Application Accepted",
+  "Academy Scheduled",
+  "Academy Passed",
+  "Ride Alongs Completed",
+  "Cleared For Patrol"
+];
 
 const rankCategories = [
   {
@@ -166,7 +176,7 @@ function renderRosterTable() {
           const tigDisplay = tigDays !== null ? formatTig(String(tigDays)) : "";
           return `<tr>
         <td>${escapeHtml(entry.callsign || "-")}</td>
-        <td>${escapeHtml(entry.name || "Vacant")}</td>
+        <td>${escapeHtml(entry.name || "Vacant")}${entry.clearedForPatrol ? `<span class="cleared-badge" title="Cleared for patrol">✓</span>` : ""}</td>
         <td>${isVacant ? "" : escapeHtml(entry.notes || "-")}</td>
         <td class="${statusClass(entry.activity)}">${escapeHtml(entry.activity || "Vacant")}</td>
         <td>${escapeHtml(entry.rank || "-")}</td>
@@ -453,6 +463,7 @@ function setDashboardState() {
   const signedIn = Boolean(sessionUser);
   $("#authPanel").classList.toggle("hidden", signedIn);
   $("#dashboardPanel").classList.toggle("hidden", !signedIn);
+  $("#onboardingNavBtn").classList.toggle("hidden", !sessionUser?.canOnboard);
   if (!signedIn) return;
 
   $("#signedInAs").textContent = `${sessionUser.name} (${sessionUser.role})`;
@@ -483,6 +494,7 @@ async function loadSession() {
   setDashboardState();
   if (sessionUser?.canEditRoster) await loadApplications();
   if (sessionUser?.canManageUsers) await loadUsers();
+  if (sessionUser?.canOnboard) await loadOnboarding();
 }
 
 async function loadApplications() {
@@ -511,6 +523,93 @@ function renderUsers() {
     .join("");
 }
 
+async function loadOnboarding() {
+  const data = await api("/api/onboarding");
+  onboardingCards = data.cards;
+  renderKanban();
+}
+
+function renderKanban() {
+  $("#kanbanBoard").innerHTML = onboardingStages
+    .map((stage) => {
+      const cards = onboardingCards.filter((c) => c.stage === stage);
+      const isLast = stage === "Cleared For Patrol";
+      return `<div class="kanban-col${isLast ? " kanban-col-final" : ""}">
+        <div class="kanban-col-head">
+          <span>${escapeHtml(stage)}</span>
+          <span class="kanban-count">${cards.length}</span>
+        </div>
+        <div class="kanban-cards" data-stage="${escapeHtml(stage)}">
+          ${cards
+            .map(
+              (card) => `<div class="kanban-card" draggable="true" data-card-id="${escapeHtml(card.id)}">
+              <strong>${escapeHtml(card.name)}</strong>
+              <small>${escapeHtml(card.discord)}</small>
+              ${card.callsign ? `<span class="pill">${escapeHtml(card.callsign)}</span>` : ""}
+            </div>`
+            )
+            .join("")}
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  // Drag events on cards
+  $$(".kanban-card").forEach((card) => {
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", card.dataset.cardId);
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+  });
+
+  // Drop zones
+  $$(".kanban-cards").forEach((zone) => {
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("drag-over");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+    zone.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      zone.classList.remove("drag-over");
+      const cardId = e.dataTransfer.getData("text/plain");
+      const targetStage = zone.dataset.stage;
+      // Don't re-drop on same stage
+      const card = onboardingCards.find((c) => c.id === cardId);
+      if (!card || card.stage === targetStage) return;
+      await moveOnboardingCard(cardId, targetStage);
+    });
+  });
+}
+
+async function moveOnboardingCard(cardId, stage) {
+  const body = { stage };
+
+  if (stage === "Academy Passed") {
+    const callsign = prompt(
+      "Assign a Probationary Officer callsign for this recruit:\n(They will be promoted to Probationary Officer on the roster)"
+    );
+    if (callsign === null) return; // cancelled
+    if (!callsign.trim()) { toast("Callsign required to advance to Academy Passed."); return; }
+    body.callsign = callsign.trim();
+  }
+
+  try {
+    await api(`/api/onboarding/${encodeURIComponent(cardId)}`, {
+      method: "PUT",
+      body: JSON.stringify(body)
+    });
+    await loadOnboarding();
+    if (stage === "Cleared For Patrol" || stage === "Academy Passed") {
+      await loadRoster(); // refresh public roster for checkmark / rank update
+    }
+    toast(`Moved to "${stage}"`);
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
 function userToForm(user = {}) {
   const form = $("#userForm");
   const fields = form.elements;
@@ -521,6 +620,7 @@ function userToForm(user = {}) {
   fields.role.value = user.role || "viewer";
   fields.canEditRoster.checked = Boolean(user.canEditRoster);
   fields.canManageUsers.checked = Boolean(user.canManageUsers);
+  fields.canOnboard.checked = Boolean(user.canOnboard);
 }
 
 function switchApplyTab(tab) {
@@ -569,11 +669,16 @@ function wireEvents() {
     button.addEventListener("click", () => {
       $$(".nav-button").forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
-      $("#publicView").classList.toggle("hidden", button.dataset.view !== "public");
-      $("#applyView").classList.toggle("hidden", button.dataset.view !== "apply");
-      $("#dashboardView").classList.toggle("hidden", button.dataset.view !== "dashboard");
+      const view = button.dataset.view;
+      $("#publicView").classList.toggle("hidden", view !== "public");
+      $("#applyView").classList.toggle("hidden", view !== "apply");
+      $("#dashboardView").classList.toggle("hidden", view !== "dashboard");
+      $("#onboardingView").classList.toggle("hidden", view !== "onboarding");
+      if (view === "onboarding" && sessionUser?.canOnboard) loadOnboarding();
     });
   });
+
+  $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
 
   $("#applyAgainButton").addEventListener("click", () => {
     localStorage.removeItem("pd_application_id");
@@ -827,7 +932,8 @@ function wireEvents() {
       password: fields.password.value,
       role: fields.role.value,
       canEditRoster: fields.canEditRoster.checked,
-      canManageUsers: fields.canManageUsers.checked
+      canManageUsers: fields.canManageUsers.checked,
+      canOnboard: fields.canOnboard.checked
     };
     try {
       if (payload.id) {
