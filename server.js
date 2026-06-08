@@ -597,12 +597,12 @@ async function handleApi(req, res) {
       await writeJson(rosterPath, roster);
     }
 
-    // Cleared For Patrol → set clearedForPatrol flag on roster entry
-    if (payload.stage === "Cleared For Patrol" && board.cards[cardIdx].rosterId) {
+    // Sync clearedForPatrol on roster entry based on stage
+    if (board.cards[cardIdx].rosterId) {
       const roster = await readJson(rosterPath);
       const rIdx = roster.roster.findIndex((e) => e.id === board.cards[cardIdx].rosterId);
       if (rIdx !== -1) {
-        roster.roster[rIdx].clearedForPatrol = true;
+        roster.roster[rIdx].clearedForPatrol = payload.stage === "Cleared For Patrol";
         roster.roster[rIdx].updatedAt = new Date().toISOString();
         await writeJson(rosterPath, roster);
       }
