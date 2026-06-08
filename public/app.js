@@ -648,18 +648,12 @@ function renderKanban() {
 
 async function moveOnboardingCard(cardId, stage, extra = {}) {
   try {
-    // Check if the card is currently in "Cleared For Patrol" before the move
-    const card = onboardingCards.find((c) => c.id === cardId);
-    const wasCleared = card?.stage === "Cleared For Patrol";
-
     await api(`/api/onboarding/${encodeURIComponent(cardId)}`, {
       method: "PUT",
       body: JSON.stringify({ stage, ...extra })
     });
-    await loadOnboarding();
-    if (stage === "Cleared For Patrol" || stage === "Academy Passed" || wasCleared) {
-      await loadRoster();
-    }
+    // Always reload both so roster badges (clearedForPatrol, rank, etc.) stay in sync
+    await Promise.all([loadOnboarding(), loadRoster()]);
     toast(`Moved to "${stage}"`);
   } catch (err) {
     toast(err.message);
