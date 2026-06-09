@@ -63,9 +63,9 @@ async function bodyJson(req) {
 
 // ── Google OAuth helpers ────────────────────────────────────────────────────
 
-const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID     || "";
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
-const APP_URL              = process.env.APP_URL               || "http://localhost:3000";
+const GOOGLE_CLIENT_ID     = (process.env.GOOGLE_CLIENT_ID     || "").trim();
+const GOOGLE_CLIENT_SECRET = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
+const APP_URL              = (process.env.APP_URL               || "http://localhost:3000").replace(/\/$/, "");
 const GOOGLE_REDIRECT_URI  = `${APP_URL}/api/auth/google/callback`;
 
 function httpsPost(urlStr, body) {
@@ -800,5 +800,7 @@ const server = http.createServer(async (req, res) => {
 initDataDir().then(() => {
   server.listen(port, () => {
     console.log(`PD roster running at http://localhost:${port}`);
+    console.log(`Google OAuth: ${GOOGLE_CLIENT_ID ? "CONFIGURED" : "NOT CONFIGURED"}`);
+    console.log(`APP_URL: ${APP_URL}`);
   });
 });
