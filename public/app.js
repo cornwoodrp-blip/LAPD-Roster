@@ -405,15 +405,7 @@ function entryToForm(entry) {
 }
 
 function populateAcceptRankDropdown() {
-  const allRanks = rankCategories.flatMap((cat) => cat.ranks);
-  $("#acceptRankPicker").innerHTML = [
-    `<option value="">— Select rank —</option>`,
-    ...rankCategories.map(
-      (cat) => `<optgroup label="${escapeHtml(cat.name)}">${cat.ranks
-        .map((r) => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`)
-        .join("")}</optgroup>`
-    )
-  ].join("");
+  $("#acceptRankPicker").innerHTML = `<option value="Recruit">Recruit</option>`;
 }
 
 function populateAcceptCallsigns(rank) {
