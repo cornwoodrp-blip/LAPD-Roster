@@ -971,6 +971,34 @@ legend {
   padding-top: 5px;
 }
 
+.card-timer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  margin-top: 4px;
+  padding-top: 5px;
+  text-transform: uppercase;
+}
+
+.card-timer-overdue {
+  color: #e05555;
+}
+
+.kanban-card-decayed {
+  border-color: rgba(200, 50, 50, 0.6);
+  background: rgba(120, 20, 20, 0.25);
+}
+
+.kanban-card-decayed:hover {
+  border-color: #e05555;
+}
+
+.kanban-card-decayed strong {
+  color: #f08080;
+}
+
 /* ── Terminate drop zone ── */
 
 .terminate-zone {

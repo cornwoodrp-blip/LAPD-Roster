@@ -24,6 +24,18 @@ const onboardingStages = [
   "Cleared For Patrol"
 ];
 
+// How long a card can sit in each stage before it decays (ms). null = no decay.
+const STAGE_DECAY_MS = {
+  "Application Pending":   48 * 3600 * 1000,
+  "Application Accepted":  24 * 3600 * 1000,
+  "Academy Scheduled":     72 * 3600 * 1000,
+  "Academy Passed":        72 * 3600 * 1000,
+  "Ride Alongs Completed": 72 * 3600 * 1000,
+  "Cleared For Patrol":    null,
+};
+
+let decayTimerInterval = null;
+
 const rankCategories = [
   {
     name: "High Command",
@@ -674,7 +686,45 @@ async function loadOnboarding() {
   renderKanban();
 }
 
+function cardDecayInfo(card) {
+  const limit = STAGE_DECAY_MS[card.stage];
+  if (!limit) return null;
+  const entered = card.stageEnteredAt || card.createdAt;
+  if (!entered) return null;
+  const elapsed = Date.now() - new Date(entered).getTime();
+  const remaining = limit - elapsed;
+  return { remaining, decayed: remaining <= 0 };
+}
+
+function formatCountdown(ms) {
+  if (ms <= 0) return "OVERDUE";
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h >= 24) {
+    const d = Math.floor(h / 24);
+    const rh = h % 24;
+    return `${d}d ${rh}h left`;
+  }
+  return `${h}h ${m}m left`;
+}
+
+function updateDecayTimers() {
+  $$(".kanban-card[data-card-id]").forEach((el) => {
+    const card = onboardingCards.find((c) => c.id === el.dataset.cardId);
+    if (!card) return;
+    const info = cardDecayInfo(card);
+    const timerEl = el.querySelector(".card-timer");
+    if (!timerEl || !info) return;
+    timerEl.textContent = formatCountdown(info.remaining);
+    el.classList.toggle("kanban-card-decayed", info.decayed);
+    timerEl.classList.toggle("card-timer-overdue", info.decayed);
+  });
+}
+
 function renderKanban() {
+  // Clear existing ticker
+  if (decayTimerInterval) { clearInterval(decayTimerInterval); decayTimerInterval = null; }
+
   $("#kanbanBoard").innerHTML = onboardingStages
     .map((stage) => {
       const cards = onboardingCards.filter((c) => c.stage === stage);
@@ -686,8 +736,10 @@ function renderKanban() {
         </div>
         <div class="kanban-cards" data-stage="${escapeHtml(stage)}">
           ${cards
-            .map(
-              (card) => `<div class="kanban-card" draggable="true" data-card-id="${escapeHtml(card.id)}">
+            .map((card) => {
+              const info = cardDecayInfo(card);
+              const decayed = info?.decayed ?? false;
+              return `<div class="kanban-card${decayed ? " kanban-card-decayed" : ""}" draggable="true" data-card-id="${escapeHtml(card.id)}">
               <strong>${escapeHtml(card.name)}</strong>
               <small class="card-discord">${escapeHtml(card.discord)}</small>
               ${card.callsign || card.rank ? `<div class="card-meta">
@@ -695,13 +747,17 @@ function renderKanban() {
                 ${card.rank ? `<span class="pill">${escapeHtml(card.rank)}</span>` : ""}
               </div>` : ""}
               ${card.acceptedBy ? `<small class="card-accepted">👤 ${escapeHtml(card.acceptedBy)}</small>` : ""}
-            </div>`
-            )
+              ${info ? `<div class="card-timer${info.decayed ? " card-timer-overdue" : ""}">${formatCountdown(info.remaining)}</div>` : ""}
+            </div>`;
+            })
             .join("")}
         </div>
       </div>`;
     })
     .join("");
+
+  // Live-update timers every 30s
+  decayTimerInterval = setInterval(updateDecayTimers, 30000);
 
   // Drag events on cards
   $$(".kanban-card").forEach((card) => {

@@ -229,7 +229,8 @@ async function handleApi(req, res) {
       applicationId: next.id,
       rosterId: "",
       stage: "Application Pending",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      stageEnteredAt: new Date().toISOString()
     });
     await writeJson(onboardingPath, board);
 
@@ -456,6 +457,7 @@ async function handleApi(req, res) {
       board.cards[cardIdx].acceptedBy = user.name;
       board.cards[cardIdx].callsign = entry.callsign;
       board.cards[cardIdx].rank = entry.rank;
+      board.cards[cardIdx].stageEnteredAt = new Date().toISOString();
     }
     await writeJson(onboardingPath, board);
 
@@ -570,6 +572,7 @@ async function handleApi(req, res) {
     board.cards[cardIdx].stage = payload.stage;
     board.cards[cardIdx].movedBy = user.name;
     board.cards[cardIdx].movedAt = new Date().toISOString();
+    board.cards[cardIdx].stageEnteredAt = new Date().toISOString();
 
     // Academy Passed → promote to selected rank and fill the chosen vacant slot
     if (payload.stage === "Academy Passed" && payload.callsign) {
