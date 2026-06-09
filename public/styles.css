@@ -739,6 +739,22 @@ legend {
 
 /* ── Mini lists ── */
 
+/* Entries panel: fixed header+search, scrollable list */
+.entries-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.entries-panel #entrySearch {
+  flex-shrink: 0;
+}
+
+.entries-panel .mini-list {
+  flex: 1;
+  min-height: 0;
+}
+
 .mini-list {
   border: 1px solid var(--line);
   border-radius: 6px;
