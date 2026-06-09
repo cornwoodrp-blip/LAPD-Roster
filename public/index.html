@@ -188,13 +188,63 @@
         <div class="kanban-head">
           <div>
             <p class="eyebrow">Onboarding Division</p>
-            <h2>Recruit Pipeline</h2>
+            <h2 id="onboardingHeading">Recruit Pipeline</h2>
+          </div>
+          <div class="onboarding-tabs">
+            <button class="onboarding-tab active" data-tab="pipeline">Recruit Pipeline</button>
+            <button class="onboarding-tab" data-tab="applications">Application Inbox</button>
           </div>
           <button id="refreshOnboardingBtn" type="button" class="secondary">Refresh</button>
         </div>
-        <div class="kanban-board" id="kanbanBoard"></div>
-        <div id="terminateZone" class="terminate-zone hidden">
-          <span>&#9660; DROP HERE TO TERMINATE EMPLOYEE</span>
+
+        <!-- Pipeline tab -->
+        <div id="pipelineTab">
+          <div class="kanban-board" id="kanbanBoard"></div>
+          <div id="terminateZone" class="terminate-zone hidden">
+            <span>&#9660; DROP HERE TO TERMINATE EMPLOYEE</span>
+          </div>
+        </div>
+
+        <!-- Applications tab -->
+        <div id="applicationsTab" class="hidden">
+          <div class="editor-panel applications-admin">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Application Inbox</p>
+                <h3>Department applications</h3>
+              </div>
+              <button id="refreshApplicationsButton" type="button" class="secondary">Refresh</button>
+            </div>
+            <div class="applications-layout">
+              <div class="mini-list applications" id="applicationList"></div>
+              <form id="acceptApplicationForm" class="accept-form">
+                <h3 id="acceptFormTitle">Accept applicant</h3>
+                <input name="applicationId" type="hidden">
+                <input name="vacantEntryId" type="hidden">
+                <label><span>Applicant</span><input name="name" disabled></label>
+                <div class="form-grid">
+                  <label>
+                    <span>Rank</span>
+                    <select name="rank" id="acceptRankPicker" required>
+                      <option value="">— Select rank —</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Callsign</span>
+                    <select name="callsign" id="acceptCallsignPicker" disabled required>
+                      <option value="">— Select rank first —</option>
+                    </select>
+                  </label>
+                </div>
+                <label><span>Promotion date</span><input name="promotionDate" type="date"></label>
+                <div class="button-row">
+                  <button type="submit">Accept and add to roster</button>
+                  <button id="rejectApplicationButton" type="button" class="danger">Reject</button>
+                </div>
+                <p id="applicationDetail" class="notice"></p>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -340,45 +390,6 @@
               <div class="mini-list" id="entryList"></div>
             </section>
           </div>
-
-          <section class="editor-panel applications-admin">
-            <div class="section-head">
-              <div>
-                <p class="eyebrow">Application Inbox</p>
-                <h3>Department applications</h3>
-              </div>
-              <button id="refreshApplicationsButton" type="button" class="secondary">Refresh</button>
-            </div>
-            <div class="applications-layout">
-              <div class="mini-list applications" id="applicationList"></div>
-              <form id="acceptApplicationForm" class="accept-form">
-                <h3 id="acceptFormTitle">Accept applicant</h3>
-                <input name="applicationId" type="hidden">
-                <input name="vacantEntryId" type="hidden">
-                <label><span>Applicant</span><input name="name" disabled></label>
-                <div class="form-grid">
-                  <label>
-                    <span>Rank</span>
-                    <select name="rank" id="acceptRankPicker" required>
-                      <option value="">— Select rank —</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span>Callsign</span>
-                    <select name="callsign" id="acceptCallsignPicker" disabled required>
-                      <option value="">— Select rank first —</option>
-                    </select>
-                  </label>
-                </div>
-                <label><span>Promotion date</span><input name="promotionDate" type="date"></label>
-                <div class="button-row">
-                  <button type="submit">Accept and add to roster</button>
-                  <button id="rejectApplicationButton" type="button" class="danger">Reject</button>
-                </div>
-                <p id="applicationDetail" class="notice"></p>
-              </form>
-            </div>
-          </section>
 
           <section id="userAdmin" class="editor-panel user-admin hidden">
             <h3>User permissions</h3>

@@ -594,7 +594,8 @@ function setDashboardState() {
   }[sessionUser.role] || sessionUser.role;
   $("#signedInAs").textContent = `${sessionUser.name} (${roleLabel})`;
   $("#userAdmin").classList.toggle("hidden", !sessionUser.canManageUsers);
-  $(".applications-admin").classList.toggle("hidden", !canSeeApplications);
+  // Applications tab in onboarding view — show/hide based on permission
+  $$(".onboarding-tab[data-tab='applications']").forEach((t) => t.classList.toggle("hidden", !canSeeApplications));
   const canSeeBugs = sessionUser.canEditRoster || sessionUser.canManageUsers;
   $("#bugReportsAdmin").classList.toggle("hidden", !canSeeBugs);
   // Hide roster entry editor for users who can't edit roster
@@ -940,7 +941,10 @@ function showView(view) {
   $("#applyView").classList.toggle("hidden", view !== "apply");
   $("#dashboardView").classList.toggle("hidden", view !== "dashboard");
   $("#onboardingView").classList.toggle("hidden", view !== "onboarding");
-  if (view === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) loadOnboarding();
+  if (view === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) {
+    loadOnboarding();
+    if (sessionUser?.canEditRoster || sessionUser?.canOnboard) loadApplications();
+  }
 }
 
 function wireEvents() {
@@ -952,7 +956,24 @@ function wireEvents() {
     button.addEventListener("click", () => showView(button.dataset.view));
   });
 
-  $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
+  $("#refreshOnboardingBtn").addEventListener("click", () => {
+    const activeTab = document.querySelector(".onboarding-tab.active")?.dataset.tab;
+    if (activeTab === "applications") loadApplications();
+    else loadOnboarding();
+  });
+
+  // Onboarding tab switcher
+  $$(".onboarding-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      $$(".onboarding-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      const isPipeline = tab.dataset.tab === "pipeline";
+      $("#pipelineTab").classList.toggle("hidden", !isPipeline);
+      $("#applicationsTab").classList.toggle("hidden", isPipeline);
+      $("#onboardingHeading").textContent = isPipeline ? "Recruit Pipeline" : "Application Inbox";
+      if (!isPipeline) loadApplications();
+    });
+  });
 
   $("#academyRankPicker").addEventListener("change", () => {
     populateAcademyCallsigns($("#academyRankPicker").value);
