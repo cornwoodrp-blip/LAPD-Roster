@@ -807,7 +807,30 @@ legend {
 }
 
 .users .mini-item {
-  grid-template-columns: 1fr 130px 180px;
+  grid-template-columns: 1fr auto;
+}
+
+.user-group-header {
+  align-items: center;
+  background: rgba(212,168,32,.06);
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  display: flex;
+  font-size: 10px;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: .8px;
+  padding: 6px 12px;
+  text-transform: uppercase;
+}
+
+.user-group-count {
+  background: rgba(212,168,32,.15);
+  border-radius: 10px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
 }
 
 /* ── Applications ── */

@@ -675,15 +675,22 @@ function renderBugReports() {
 }
 
 function renderUsers() {
-  $("#userList").innerHTML = users
-    .map(
-      (user) => `<button class="mini-item" data-user-id="${user.id}">
+  const ROLE_ORDER = ["admin", "command", "supervisor", "onboarding", "viewer"];
+  const ROLE_LABELS = { admin: "Admin", command: "Command Staff", supervisor: "Supervisor", onboarding: "Onboarding", viewer: "Officers / Civilians" };
+
+  const groups = ROLE_ORDER.map((role) => ({
+    role,
+    label: ROLE_LABELS[role],
+    members: users.filter((u) => (u.role || "viewer") === role).sort((a, b) => a.name.localeCompare(b.name))
+  })).filter((g) => g.members.length);
+
+  $("#userList").innerHTML = groups.map((g) => `
+    <div class="user-group-header">${escapeHtml(g.label)} <span class="user-group-count">${g.members.length}</span></div>
+    ${g.members.map((user) => `<button class="mini-item" data-user-id="${user.id}">
         <span><strong>${escapeHtml(user.name)}</strong><br><small>${escapeHtml(user.email)}</small></span>
-        <small>${escapeHtml({ admin: "Admin", command: "Command", supervisor: "Supervisor", onboarding: "Onboarding", viewer: "Viewer" }[user.role] || user.role)}</small>
         <small>${user.canEditRoster ? "Roster edit" : "Read only"}${user.canManageUsers ? " + users" : ""}</small>
-      </button>`
-    )
-    .join("");
+      </button>`).join("")}
+  `).join("");
 }
 
 async function loadOnboarding() {
