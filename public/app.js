@@ -492,6 +492,8 @@ function formToEntry() {
 function setDashboardState() {
   const signedIn = Boolean(sessionUser);
   const canSeeOnboarding = sessionUser?.canOnboard || sessionUser?.role === "admin";
+  const canSeeApplications = sessionUser?.canEditRoster || sessionUser?.canOnboard || sessionUser?.role === "admin";
+  const canSeeDashboard = signedIn && (sessionUser?.canEditRoster || canSeeApplications);
 
   // Topbar auth area
   $("#signInBtn").classList.toggle("hidden", signedIn);
@@ -500,8 +502,8 @@ function setDashboardState() {
     $("#userPillName").textContent = sessionUser.name;
   }
 
-  // Nav buttons — only show when signed in
-  $("#dashboardNavBtn").classList.toggle("hidden", !signedIn);
+  // Nav buttons — only show when signed in with appropriate access
+  $("#dashboardNavBtn").classList.toggle("hidden", !canSeeDashboard);
   $("#onboardingNavBtn").classList.toggle("hidden", !canSeeOnboarding);
 
   // If signed out and currently on a protected view, redirect to public roster
@@ -513,9 +515,15 @@ function setDashboardState() {
     return;
   }
 
-  $("#signedInAs").textContent = `${sessionUser.name} (${sessionUser.role})`;
+  const roleLabel = {
+    admin: "Admin", command: "Command Staff", supervisor: "Supervisor",
+    onboarding: "Onboarding", viewer: "Viewer"
+  }[sessionUser.role] || sessionUser.role;
+  $("#signedInAs").textContent = `${sessionUser.name} (${roleLabel})`;
   $("#userAdmin").classList.toggle("hidden", !sessionUser.canManageUsers);
-  $(".applications-admin").classList.toggle("hidden", !sessionUser.canEditRoster);
+  $(".applications-admin").classList.toggle("hidden", !canSeeApplications);
+  // Hide roster entry editor for users who can't edit roster
+  $("#entryForm").closest(".dashboard-grid").classList.toggle("hidden", !sessionUser.canEditRoster);
   $("#editNotice").textContent = sessionUser.canEditRoster
     ? "Changes save to data/roster.json immediately."
     : "Your account can view the dashboard but cannot edit roster entries.";
@@ -539,7 +547,7 @@ async function loadSession() {
   const data = await api("/api/session");
   sessionUser = data.user;
   setDashboardState();
-  if (sessionUser?.canEditRoster) await loadApplications();
+  if (sessionUser?.canEditRoster || sessionUser?.canOnboard) await loadApplications();
   if (sessionUser?.canManageUsers) await loadUsers();
   if (sessionUser?.canOnboard || sessionUser?.role === "admin") await loadOnboarding();
 }
@@ -563,7 +571,7 @@ function renderUsers() {
     .map(
       (user) => `<button class="mini-item" data-user-id="${user.id}">
         <span><strong>${escapeHtml(user.name)}</strong><br><small>${escapeHtml(user.email)}</small></span>
-        <small>${escapeHtml(user.role)}</small>
+        <small>${escapeHtml({ admin: "Admin", command: "Command", supervisor: "Supervisor", onboarding: "Onboarding", viewer: "Viewer" }[user.role] || user.role)}</small>
         <small>${user.canEditRoster ? "Roster edit" : "Read only"}${user.canManageUsers ? " + users" : ""}</small>
       </button>`
     )
@@ -819,7 +827,7 @@ function wireEvents() {
       await api(`/api/onboarding/${encodeURIComponent(id)}`, { method: "DELETE" });
       await loadRoster();
       await loadOnboarding();
-      if (sessionUser?.canEditRoster) await loadApplications();
+      if (sessionUser?.canEditRoster || sessionUser?.canOnboard) await loadApplications();
       toast("Employee terminated and removed from roster.");
     } catch (err) {
       toast(err.message);
@@ -905,7 +913,7 @@ function wireEvents() {
       form.reset();
       updateSubmitState();
       showApplicationStatus(next.application);
-      if (sessionUser?.canEditRoster) await loadApplications();
+      if (sessionUser?.canEditRoster || sessionUser?.canOnboard) await loadApplications();
       toast("Application submitted.");
     } catch (error) {
       $("#applicationNotice").textContent = error.message;
@@ -989,7 +997,7 @@ function wireEvents() {
     $("#loginForm").reset();
     $("#registerForm").reset();
     setDashboardState();
-    if (sessionUser.canEditRoster) await loadApplications();
+    if (sessionUser.canEditRoster || sessionUser.canOnboard) await loadApplications();
     if (sessionUser.canManageUsers) await loadUsers();
     if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
     showView("dashboard");
@@ -1153,6 +1161,23 @@ function wireEvents() {
   });
 
   $("#newUserButton").addEventListener("click", () => userToForm());
+
+  // Auto-fill permission checkboxes when role changes
+  const ROLE_PERMISSIONS = {
+    viewer:     { canEditRoster: false, canManageUsers: false, canOnboard: false },
+    onboarding: { canEditRoster: false, canManageUsers: false, canOnboard: true  },
+    supervisor: { canEditRoster: true,  canManageUsers: false, canOnboard: false },
+    command:    { canEditRoster: true,  canManageUsers: true,  canOnboard: false },
+    admin:      { canEditRoster: true,  canManageUsers: true,  canOnboard: true  },
+  };
+  $("#rolePicker").addEventListener("change", (e) => {
+    const perms = ROLE_PERMISSIONS[e.target.value];
+    if (!perms) return;
+    const fields = $("#userForm").elements;
+    fields.canEditRoster.checked  = perms.canEditRoster;
+    fields.canManageUsers.checked = perms.canManageUsers;
+    fields.canOnboard.checked     = perms.canOnboard;
+  });
 
   $("#userForm").addEventListener("submit", async (event) => {
     event.preventDefault();

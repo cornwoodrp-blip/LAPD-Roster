@@ -343,14 +343,18 @@ async function handleApi(req, res) {
   }
 
   if (req.method === "GET" && url.pathname === "/api/applications") {
-    if (!requireEdit(user, res)) return;
+    if (!user || (!user.canEditRoster && !user.canOnboard && user.role !== "admin")) {
+      send(res, 403, { error: "Forbidden" }); return;
+    }
     const applications = await readJson(applicationsPath);
     send(res, 200, applications);
     return;
   }
 
   if (req.method === "POST" && url.pathname.match(/^\/api\/applications\/[^/]+\/reject$/)) {
-    if (!requireEdit(user, res)) return;
+    if (!user || (!user.canEditRoster && !user.canOnboard && user.role !== "admin")) {
+      send(res, 403, { error: "Forbidden" }); return;
+    }
     const id = decodeURIComponent(url.pathname.split("/")[3]);
     const data = await readJson(applicationsPath);
     const index = data.applications.findIndex((application) => application.id === id);
@@ -376,7 +380,9 @@ async function handleApi(req, res) {
   }
 
   if (req.method === "POST" && url.pathname.match(/^\/api\/applications\/[^/]+\/accept$/)) {
-    if (!requireEdit(user, res)) return;
+    if (!user || (!user.canEditRoster && !user.canOnboard && user.role !== "admin")) {
+      send(res, 403, { error: "Forbidden" }); return;
+    }
     const id = decodeURIComponent(url.pathname.split("/")[3]);
     const payload = await bodyJson(req);
     const applications = await readJson(applicationsPath);
