@@ -23,6 +23,13 @@
         <button class="nav-button hidden" data-view="onboarding" id="onboardingNavBtn">Onboarding</button>
       </nav>
       <div id="authArea" class="auth-area">
+        <select id="previewRolePicker" class="preview-role-picker hidden">
+          <option value="">👁 Preview as role…</option>
+          <option value="viewer">Viewer</option>
+          <option value="onboarding">Onboarding</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="command">Command Staff</option>
+        </select>
         <button id="signInBtn" class="sign-in-btn">Sign In</button>
         <div id="userPill" class="user-pill hidden">
           <span id="userPillName"></span>
@@ -30,6 +37,11 @@
         </div>
       </div>
     </header>
+
+    <div id="previewBanner" class="preview-banner hidden">
+      <span>👁 Previewing portal as <strong id="previewBannerRole"></strong> — your actual permissions are unchanged</span>
+      <button id="exitPreviewBtn" type="button">Exit Preview</button>
+    </div>
 
     <main>
       <section class="summary-grid" aria-label="Roster summary">

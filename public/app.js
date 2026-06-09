@@ -3,6 +3,7 @@ let strikes = ["1", "2", "3"];
 
 let rosterData = { roster: [] };
 let sessionUser = null;
+let realSessionUser = null; // set when admin is previewing another role
 let selectedEntryId = null;
 let selectedApplicationId = null;
 let users = [];
@@ -489,8 +490,45 @@ function formToEntry() {
   };
 }
 
+const ROLE_PERMISSIONS = {
+  viewer:     { canEditRoster: false, canManageUsers: false, canOnboard: false },
+  onboarding: { canEditRoster: false, canManageUsers: false, canOnboard: true  },
+  supervisor: { canEditRoster: true,  canManageUsers: false, canOnboard: false },
+  command:    { canEditRoster: true,  canManageUsers: true,  canOnboard: false },
+  admin:      { canEditRoster: true,  canManageUsers: true,  canOnboard: true  },
+};
+
+const ROLE_LABELS = {
+  admin: "Admin", command: "Command Staff", supervisor: "Supervisor",
+  onboarding: "Onboarding", viewer: "Viewer"
+};
+
+function activatePreview(role) {
+  if (!role) { exitPreview(); return; }
+  if (!realSessionUser) realSessionUser = sessionUser;
+  const perms = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.viewer;
+  sessionUser = { ...realSessionUser, role, ...perms };
+  updatePreviewBanner();
+  setDashboardState();
+  showView("public");
+}
+
+function exitPreview() {
+  if (realSessionUser) { sessionUser = realSessionUser; realSessionUser = null; }
+  $("#previewRolePicker").value = "";
+  updatePreviewBanner();
+  setDashboardState();
+}
+
+function updatePreviewBanner() {
+  const previewing = Boolean(realSessionUser);
+  $("#previewBanner").classList.toggle("hidden", !previewing);
+  if (previewing) $("#previewBannerRole").textContent = ROLE_LABELS[sessionUser.role] || sessionUser.role;
+}
+
 function setDashboardState() {
   const signedIn = Boolean(sessionUser);
+  const isRealAdmin = realSessionUser?.role === "admin" || (!realSessionUser && sessionUser?.role === "admin");
   const canSeeOnboarding = sessionUser?.canOnboard || sessionUser?.role === "admin";
   const canSeeApplications = sessionUser?.canEditRoster || sessionUser?.canOnboard || sessionUser?.role === "admin";
   const canSeeDashboard = signedIn && (sessionUser?.canEditRoster || canSeeApplications);
@@ -501,6 +539,9 @@ function setDashboardState() {
   if (signedIn) {
     $("#userPillName").textContent = sessionUser.name;
   }
+
+  // Preview role picker — only for real admins, not while previewing
+  $("#previewRolePicker").classList.toggle("hidden", !isRealAdmin || Boolean(realSessionUser));
 
   // Nav buttons — only show when signed in with appropriate access
   $("#dashboardNavBtn").classList.toggle("hidden", !canSeeDashboard);
@@ -969,6 +1010,9 @@ function wireEvents() {
   });
 
   // Sign-in modal open/close
+  $("#previewRolePicker").addEventListener("change", (e) => activatePreview(e.target.value));
+  $("#exitPreviewBtn").addEventListener("click", exitPreview);
+
   $("#signInBtn").addEventListener("click", () => {
     $("#signInPanel").classList.remove("hidden");
     $("#registerPanel").classList.add("hidden");
@@ -1162,14 +1206,7 @@ function wireEvents() {
 
   $("#newUserButton").addEventListener("click", () => userToForm());
 
-  // Auto-fill permission checkboxes when role changes
-  const ROLE_PERMISSIONS = {
-    viewer:     { canEditRoster: false, canManageUsers: false, canOnboard: false },
-    onboarding: { canEditRoster: false, canManageUsers: false, canOnboard: true  },
-    supervisor: { canEditRoster: true,  canManageUsers: false, canOnboard: false },
-    command:    { canEditRoster: true,  canManageUsers: true,  canOnboard: false },
-    admin:      { canEditRoster: true,  canManageUsers: true,  canOnboard: true  },
-  };
+  // Auto-fill permission checkboxes when role changes (uses module-level ROLE_PERMISSIONS)
   $("#rolePicker").addEventListener("change", (e) => {
     const perms = ROLE_PERMISSIONS[e.target.value];
     if (!perms) return;
