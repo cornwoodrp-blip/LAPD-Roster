@@ -506,41 +506,24 @@ tr:hover td {
   margin-top: 4px;
 }
 
-.google-btn {
-  align-items: center;
-  background: #fff;
-  border: 1px solid #dadce0;
-  border-radius: 6px;
-  color: #3c4043;
-  display: flex;
-  font-size: 14px;
-  font-weight: 500;
-  gap: 10px;
-  justify-content: center;
-  padding: 10px 16px;
-  text-decoration: none;
-  transition: background .15s, box-shadow .15s;
-}
-.google-btn:hover {
-  background: #f8f9fa;
-  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+.auth-switch {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: center;
 }
 
-.login-divider {
-  align-items: center;
-  color: var(--muted);
-  display: flex;
-  font-size: 12px;
-  gap: 10px;
-  letter-spacing: .5px;
-  text-transform: uppercase;
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
 }
-.login-divider::before,
-.login-divider::after {
-  background: var(--line);
-  content: "";
-  flex: 1;
-  height: 1px;
+.link-btn:hover {
+  color: #fff;
 }
 
 /* ── Status check UI ── */

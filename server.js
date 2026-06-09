@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import http from "node:http";
-import https from "node:https";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -60,50 +59,6 @@ async function bodyJson(req) {
   if (!chunks.length) return {};
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
-
-// ── Google OAuth helpers ────────────────────────────────────────────────────
-
-const APP_URL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
-
-function httpsPost(urlStr, body) {
-  return new Promise((resolve, reject) => {
-    const parsed = new URL(urlStr);
-    const data = typeof body === "string" ? body : new URLSearchParams(body).toString();
-    const req = https.request({
-      hostname: parsed.hostname,
-      path: parsed.pathname + parsed.search,
-      method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-        "content-length": Buffer.byteLength(data)
-      }
-    }, (r) => {
-      const chunks = [];
-      r.on("data", (c) => chunks.push(c));
-      r.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))));
-    });
-    req.on("error", reject);
-    req.write(data);
-    req.end();
-  });
-}
-
-function httpsGet(urlStr, bearerToken) {
-  return new Promise((resolve, reject) => {
-    const parsed = new URL(urlStr);
-    https.get({
-      hostname: parsed.hostname,
-      path: parsed.pathname + parsed.search,
-      headers: { authorization: `Bearer ${bearerToken}` }
-    }, (r) => {
-      const chunks = [];
-      r.on("data", (c) => chunks.push(c));
-      r.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))));
-    }).on("error", reject);
-  });
-}
-
-// ────────────────────────────────────────────────────────────────────────────
 
 async function currentUser(req) {
   const token = cookieValue(req, "pd_session");
@@ -685,100 +640,44 @@ async function handleApi(req, res) {
     return;
   }
 
-  // Diagnostic — remove after debugging
-  if (req.method === "GET" && url.pathname === "/api/auth/check") {
-    send(res, 200, {
-      googleConfigured: Boolean((process.env.GOOGLE_CLIENT_ID || "").trim()),
-      clientIdLen: (process.env.GOOGLE_CLIENT_ID || "").length,
-      appUrl: APP_URL
+  if (req.method === "POST" && url.pathname === "/api/register") {
+    const payload = await bodyJson(req);
+    const name     = String(payload.name     || "").trim();
+    const email    = String(payload.email    || "").trim().toLowerCase();
+    const password = String(payload.password || "").trim();
+    if (!name || !email || !password) {
+      send(res, 400, { error: "Name, email, and password are all required." });
+      return;
+    }
+    if (password.length < 6) {
+      send(res, 400, { error: "Password must be at least 6 characters." });
+      return;
+    }
+    const data = await readJson(usersPath);
+    if (data.users.some((u) => u.email === email)) {
+      send(res, 409, { error: "An account with that email already exists." });
+      return;
+    }
+    const newUser = {
+      id: crypto.randomUUID(),
+      name,
+      email,
+      password,
+      role: "viewer",
+      canEditRoster: false,
+      canManageUsers: false,
+      canOnboard: false
+    };
+    data.users.push(newUser);
+    await writeJson(usersPath, data);
+    // Log them in immediately
+    const token = crypto.randomBytes(32).toString("hex");
+    sessions.set(token, { userId: newUser.id, createdAt: Date.now() });
+    send(res, 201, { user: publicUser(newUser) }, {
+      "set-cookie": `pd_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800`
     });
     return;
   }
-
-  // ── Google OAuth ────────────────────────────────────────────────────────────
-
-  if (req.method === "GET" && url.pathname === "/api/auth/google") {
-    const clientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
-    const redirectUri = `${APP_URL}/api/auth/google/callback`;
-    if (!clientId) {
-      send(res, 503, { error: "Google login is not configured." });
-      return;
-    }
-    const state = crypto.randomBytes(16).toString("hex");
-    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    authUrl.searchParams.set("client_id", clientId);
-    authUrl.searchParams.set("redirect_uri", redirectUri);
-    authUrl.searchParams.set("response_type", "code");
-    authUrl.searchParams.set("scope", "openid email profile");
-    authUrl.searchParams.set("state", state);
-    authUrl.searchParams.set("prompt", "select_account");
-    res.writeHead(302, { location: authUrl.toString() });
-    res.end();
-    return;
-  }
-
-  if (req.method === "GET" && url.pathname === "/api/auth/google/callback") {
-    const clientId     = (process.env.GOOGLE_CLIENT_ID     || "").trim();
-    const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
-    const redirectUri  = `${APP_URL}/api/auth/google/callback`;
-    const code = url.searchParams.get("code");
-    if (!code) {
-      res.writeHead(302, { location: "/?error=google_denied" });
-      res.end();
-      return;
-    }
-    try {
-      // Exchange code for tokens
-      const tokens = await httpsPost("https://oauth2.googleapis.com/token", {
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: "authorization_code"
-      });
-      if (!tokens.access_token) throw new Error("No access token returned");
-
-      // Fetch Google profile
-      const profile = await httpsGet("https://www.googleapis.com/oauth2/v2/userinfo", tokens.access_token);
-      if (!profile.email) throw new Error("No email in Google profile");
-
-      // Find or create user
-      const data = await readJson(usersPath);
-      let found = data.users.find((u) => u.email === profile.email.toLowerCase());
-      if (!found) {
-        // New user — create with viewer role, no special permissions
-        found = {
-          id: crypto.randomUUID(),
-          name: profile.name || profile.email,
-          email: profile.email.toLowerCase(),
-          password: "",          // no password — Google-only account
-          role: "viewer",
-          canEditRoster: false,
-          canManageUsers: false,
-          canOnboard: false,
-          googleId: profile.id
-        };
-        data.users.push(found);
-        await writeJson(usersPath, data);
-      }
-
-      // Create session
-      const token = crypto.randomBytes(32).toString("hex");
-      sessions.set(token, { userId: found.id, createdAt: Date.now() });
-      res.writeHead(302, {
-        location: "/",
-        "set-cookie": `pd_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800`
-      });
-      res.end();
-    } catch (err) {
-      console.error("Google OAuth error:", err);
-      res.writeHead(302, { location: "/?error=google_failed" });
-      res.end();
-    }
-    return;
-  }
-
-  // ────────────────────────────────────────────────────────────────────────────
 
   send(res, 404, { error: "Route not found." });
 }
@@ -812,7 +711,5 @@ const server = http.createServer(async (req, res) => {
 initDataDir().then(() => {
   server.listen(port, () => {
     console.log(`PD roster running at http://localhost:${port}`);
-    console.log(`Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "CONFIGURED" : "NOT CONFIGURED"} (len=${(process.env.GOOGLE_CLIENT_ID||"").length})`);
-    console.log(`APP_URL: ${APP_URL}`);
   });
 });

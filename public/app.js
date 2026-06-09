@@ -962,6 +962,8 @@ function wireEvents() {
 
   // Sign-in modal open/close
   $("#signInBtn").addEventListener("click", () => {
+    $("#signInPanel").classList.remove("hidden");
+    $("#registerPanel").classList.add("hidden");
     $("#signInModal").classList.remove("hidden");
     $("#loginForm").querySelector("[name='email']").focus();
   });
@@ -969,10 +971,34 @@ function wireEvents() {
     if (e.target === $("#signInModal")) $("#signInModal").classList.add("hidden");
   });
 
+  // Toggle between sign-in and register panels
+  $("#showRegisterBtn").addEventListener("click", () => {
+    $("#signInPanel").classList.add("hidden");
+    $("#registerPanel").classList.remove("hidden");
+    $("#registerForm").querySelector("[name='name']").focus();
+  });
+  $("#showSignInBtn").addEventListener("click", () => {
+    $("#registerPanel").classList.add("hidden");
+    $("#signInPanel").classList.remove("hidden");
+    $("#loginForm").querySelector("[name='email']").focus();
+  });
+
+  async function handleAuthSuccess(user) {
+    sessionUser = user;
+    $("#signInModal").classList.add("hidden");
+    $("#loginForm").reset();
+    $("#registerForm").reset();
+    setDashboardState();
+    if (sessionUser.canEditRoster) await loadApplications();
+    if (sessionUser.canManageUsers) await loadUsers();
+    if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
+    showView("dashboard");
+    toast(`Welcome, ${sessionUser.name}.`);
+  }
+
   $("#loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const fields = form.elements;
+    const fields = event.currentTarget.elements;
     const errEl = $("#loginError");
     errEl.classList.add("hidden");
     try {
@@ -980,15 +1006,24 @@ function wireEvents() {
         method: "POST",
         body: JSON.stringify({ email: fields.email.value, password: fields.password.value })
       });
-      sessionUser = data.user;
-      $("#signInModal").classList.add("hidden");
-      form.reset();
-      setDashboardState();
-      if (sessionUser.canEditRoster) await loadApplications();
-      if (sessionUser.canManageUsers) await loadUsers();
-      if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
-      showView("dashboard");
-      toast(`Welcome, ${sessionUser.name}.`);
+      await handleAuthSuccess(data.user);
+    } catch (error) {
+      errEl.textContent = error.message;
+      errEl.classList.remove("hidden");
+    }
+  });
+
+  $("#registerForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const fields = event.currentTarget.elements;
+    const errEl = $("#registerError");
+    errEl.classList.add("hidden");
+    try {
+      const data = await api("/api/register", {
+        method: "POST",
+        body: JSON.stringify({ name: fields.name.value, email: fields.email.value, password: fields.password.value })
+      });
+      await handleAuthSuccess(data.user);
     } catch (error) {
       errEl.textContent = error.message;
       errEl.classList.remove("hidden");
@@ -1154,15 +1189,3 @@ entryToForm(null);
 await loadSession();
 await checkSavedApplicationStatus();
 
-// Show error if Google OAuth redirected back with ?error=
-const urlError = new URLSearchParams(window.location.search).get("error");
-if (urlError) {
-  const el = $("#loginError");
-  el.textContent = urlError === "google_denied"
-    ? "Google sign-in was cancelled."
-    : "Google sign-in failed. Please try again or use your password.";
-  el.classList.remove("hidden");
-  // Open the sign-in modal so the error is visible
-  $("#signInModal").classList.remove("hidden");
-  history.replaceState(null, "", "/");
-}
