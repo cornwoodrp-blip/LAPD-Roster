@@ -450,6 +450,43 @@ tr:hover td {
   text-transform: uppercase;
 }
 
+.google-btn {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  color: #3c4043;
+  display: flex;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px 16px;
+  text-decoration: none;
+  transition: background .15s, box-shadow .15s;
+}
+.google-btn:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+
+.login-divider {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 12px;
+  gap: 10px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.login-divider::before,
+.login-divider::after {
+  background: var(--line);
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+
 /* ── Status check UI ── */
 
 .status-badge {

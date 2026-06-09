@@ -1120,3 +1120,17 @@ await loadRoster();
 entryToForm(null);
 await loadSession();
 await checkSavedApplicationStatus();
+
+// Show error if Google OAuth redirected back with ?error=
+const urlError = new URLSearchParams(window.location.search).get("error");
+if (urlError) {
+  const el = $("#loginError");
+  el.textContent = urlError === "google_denied"
+    ? "Google sign-in was cancelled."
+    : "Google sign-in failed. Please try again or use your password.";
+  el.classList.remove("hidden");
+  // Switch to dashboard view so the error is visible
+  document.querySelector("[data-view='dashboard']").click();
+  // Clean the URL
+  history.replaceState(null, "", "/");
+}

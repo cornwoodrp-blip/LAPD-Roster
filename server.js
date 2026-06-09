@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import http from "node:http";
+import https from "node:https";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,6 +60,53 @@ async function bodyJson(req) {
   if (!chunks.length) return {};
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
+
+// ── Google OAuth helpers ────────────────────────────────────────────────────
+
+const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID     || "";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+const APP_URL              = process.env.APP_URL               || "http://localhost:3000";
+const GOOGLE_REDIRECT_URI  = `${APP_URL}/api/auth/google/callback`;
+
+function httpsPost(urlStr, body) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(urlStr);
+    const data = typeof body === "string" ? body : new URLSearchParams(body).toString();
+    const req = https.request({
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "content-length": Buffer.byteLength(data)
+      }
+    }, (r) => {
+      const chunks = [];
+      r.on("data", (c) => chunks.push(c));
+      r.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))));
+    });
+    req.on("error", reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+function httpsGet(urlStr, bearerToken) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(urlStr);
+    https.get({
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      headers: { authorization: `Bearer ${bearerToken}` }
+    }, (r) => {
+      const chunks = [];
+      r.on("data", (c) => chunks.push(c));
+      r.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))));
+    }).on("error", reject);
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 async function currentUser(req) {
   const token = cookieValue(req, "pd_session");
@@ -639,6 +687,86 @@ async function handleApi(req, res) {
     send(res, 200, { card: board.cards[cardIdx] });
     return;
   }
+
+  // ── Google OAuth ────────────────────────────────────────────────────────────
+
+  if (req.method === "GET" && url.pathname === "/api/auth/google") {
+    if (!GOOGLE_CLIENT_ID) {
+      send(res, 503, { error: "Google login is not configured." });
+      return;
+    }
+    const state = crypto.randomBytes(16).toString("hex");
+    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
+    authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI);
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("scope", "openid email profile");
+    authUrl.searchParams.set("state", state);
+    authUrl.searchParams.set("prompt", "select_account");
+    res.writeHead(302, { location: authUrl.toString() });
+    res.end();
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/auth/google/callback") {
+    const code = url.searchParams.get("code");
+    if (!code) {
+      res.writeHead(302, { location: "/?error=google_denied" });
+      res.end();
+      return;
+    }
+    try {
+      // Exchange code for tokens
+      const tokens = await httpsPost("https://oauth2.googleapis.com/token", {
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: GOOGLE_REDIRECT_URI,
+        grant_type: "authorization_code"
+      });
+      if (!tokens.access_token) throw new Error("No access token returned");
+
+      // Fetch Google profile
+      const profile = await httpsGet("https://www.googleapis.com/oauth2/v2/userinfo", tokens.access_token);
+      if (!profile.email) throw new Error("No email in Google profile");
+
+      // Find or create user
+      const data = await readJson(usersPath);
+      let found = data.users.find((u) => u.email === profile.email.toLowerCase());
+      if (!found) {
+        // New user — create with viewer role, no special permissions
+        found = {
+          id: crypto.randomUUID(),
+          name: profile.name || profile.email,
+          email: profile.email.toLowerCase(),
+          password: "",          // no password — Google-only account
+          role: "viewer",
+          canEditRoster: false,
+          canManageUsers: false,
+          canOnboard: false,
+          googleId: profile.id
+        };
+        data.users.push(found);
+        await writeJson(usersPath, data);
+      }
+
+      // Create session
+      const token = crypto.randomBytes(32).toString("hex");
+      sessions.set(token, { userId: found.id, createdAt: Date.now() });
+      res.writeHead(302, {
+        location: "/",
+        "set-cookie": `pd_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800`
+      });
+      res.end();
+    } catch (err) {
+      console.error("Google OAuth error:", err);
+      res.writeHead(302, { location: "/?error=google_failed" });
+      res.end();
+    }
+    return;
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
 
   send(res, 404, { error: "Route not found." });
 }
