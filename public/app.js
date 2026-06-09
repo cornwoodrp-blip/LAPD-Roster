@@ -1115,8 +1115,10 @@ function wireEvents() {
   $("#categoryOverview").addEventListener("click", (event) => {
     const button = event.target.closest("[data-category-filter]");
     if (!button) return;
-    activeCategoryFilter = button.dataset.categoryFilter;
-    $$(".category-card").forEach((card) => card.classList.toggle("active", card === button));
+    // Click active card again → clear filter
+    const isActive = button.classList.contains("active");
+    activeCategoryFilter = isActive ? "" : button.dataset.categoryFilter;
+    $$(".category-card").forEach((card) => card.classList.toggle("active", !isActive && card === button));
     $("#rankFilter").value = "";
     $("#activityFilter").value = "";
     $("#searchInput").value = "";
