@@ -43,7 +43,7 @@ const rankCategories = [
   },
   {
     name: "Patrol Officer",
-    ranks: ["Senior Officer", "Sr. Officer", "Officer III", "Officer II", "Officer I"]
+    ranks: ["Sr. Officer", "Officer II", "Officer I"]
   },
   {
     name: "Probationary Officer",
@@ -51,7 +51,7 @@ const rankCategories = [
   },
   {
     name: "Officer In Training",
-    ranks: ["Recruit", "Cadet"]
+    ranks: ["Recruit"]
   }
 ];
 
