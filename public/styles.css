@@ -509,7 +509,7 @@ tr:hover td {
 .auth-switch {
   color: var(--muted);
   font-size: 13px;
-  margin-top: 12px;
+  margin-top: 24px;
   text-align: center;
 }
 
