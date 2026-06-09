@@ -419,9 +419,72 @@ tr:hover td {
   font-weight: 800;
 }
 
+/* ── Auth area (topbar) ── */
+
+.auth-area {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.sign-in-btn {
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 8px 16px;
+  text-transform: uppercase;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sign-in-btn:hover {
+  background: var(--gold);
+  color: #07111e;
+}
+
+.user-pill {
+  align-items: center;
+  background: rgba(212,168,32,.1);
+  border: 1px solid var(--gold-dark);
+  border-radius: 20px;
+  display: flex;
+  gap: 10px;
+  padding: 5px 6px 5px 14px;
+  white-space: nowrap;
+}
+.user-pill span {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sign-out-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  transition: border-color .15s, color .15s;
+}
+.sign-out-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
 /* ── Panels & forms ── */
 
-.auth-panel,
 .application-form,
 .editor-panel {
   background: var(--surface);
@@ -437,17 +500,10 @@ tr:hover td {
   max-width: 860px;
 }
 
-.login-form {
+#loginForm {
   display: grid;
   gap: 14px;
-  margin: 0 auto;
-  max-width: 460px;
-}
-
-.login-form h2 {
-  color: var(--gold);
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .google-btn {

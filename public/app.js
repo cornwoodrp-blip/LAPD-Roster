@@ -491,11 +491,27 @@ function formToEntry() {
 
 function setDashboardState() {
   const signedIn = Boolean(sessionUser);
-  $("#authPanel").classList.toggle("hidden", signedIn);
-  $("#dashboardPanel").classList.toggle("hidden", !signedIn);
   const canSeeOnboarding = sessionUser?.canOnboard || sessionUser?.role === "admin";
+
+  // Topbar auth area
+  $("#signInBtn").classList.toggle("hidden", signedIn);
+  $("#userPill").classList.toggle("hidden", !signedIn);
+  if (signedIn) {
+    $("#userPillName").textContent = sessionUser.name;
+  }
+
+  // Nav buttons — only show when signed in
+  $("#dashboardNavBtn").classList.toggle("hidden", !signedIn);
   $("#onboardingNavBtn").classList.toggle("hidden", !canSeeOnboarding);
-  if (!signedIn) return;
+
+  // If signed out and currently on a protected view, redirect to public roster
+  if (!signedIn) {
+    const activeView = document.querySelector(".view:not(.hidden)");
+    if (activeView?.id === "dashboardView" || activeView?.id === "onboardingView") {
+      showView("public");
+    }
+    return;
+  }
 
   $("#signedInAs").textContent = `${sessionUser.name} (${sessionUser.role})`;
   $("#userAdmin").classList.toggle("hidden", !sessionUser.canManageUsers);
@@ -745,22 +761,24 @@ async function checkSavedApplicationStatus() {
   }
 }
 
+function showView(view) {
+  $$(".nav-button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.view === view);
+  });
+  $("#publicView").classList.toggle("hidden", view !== "public");
+  $("#applyView").classList.toggle("hidden", view !== "apply");
+  $("#dashboardView").classList.toggle("hidden", view !== "dashboard");
+  $("#onboardingView").classList.toggle("hidden", view !== "onboarding");
+  if (view === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) loadOnboarding();
+}
+
 function wireEvents() {
   $$(".apply-tab").forEach((button) => {
     button.addEventListener("click", () => switchApplyTab(button.dataset.tab));
   });
 
   $$(".nav-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      $$(".nav-button").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      const view = button.dataset.view;
-      $("#publicView").classList.toggle("hidden", view !== "public");
-      $("#applyView").classList.toggle("hidden", view !== "apply");
-      $("#dashboardView").classList.toggle("hidden", view !== "dashboard");
-      $("#onboardingView").classList.toggle("hidden", view !== "onboarding");
-      if (view === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) loadOnboarding();
-    });
+    button.addEventListener("click", () => showView(button.dataset.view));
   });
 
   $("#refreshOnboardingBtn").addEventListener("click", () => loadOnboarding());
@@ -942,27 +960,42 @@ function wireEvents() {
     renderEntryList();
   });
 
+  // Sign-in modal open/close
+  $("#signInBtn").addEventListener("click", () => {
+    $("#signInModal").classList.remove("hidden");
+    $("#loginForm").querySelector("[name='email']").focus();
+  });
+  $("#signInModal").addEventListener("click", (e) => {
+    if (e.target === $("#signInModal")) $("#signInModal").classList.add("hidden");
+  });
+
   $("#loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const fields = form.elements;
+    const errEl = $("#loginError");
+    errEl.classList.add("hidden");
     try {
       const data = await api("/api/login", {
         method: "POST",
         body: JSON.stringify({ email: fields.email.value, password: fields.password.value })
       });
       sessionUser = data.user;
+      $("#signInModal").classList.add("hidden");
+      form.reset();
       setDashboardState();
       if (sessionUser.canEditRoster) await loadApplications();
       if (sessionUser.canManageUsers) await loadUsers();
       if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
-      toast("Signed in.");
+      showView("dashboard");
+      toast(`Welcome, ${sessionUser.name}.`);
     } catch (error) {
-      toast(error.message);
+      errEl.textContent = error.message;
+      errEl.classList.remove("hidden");
     }
   });
 
-  $("#logoutButton").addEventListener("click", async () => {
+  $("#signOutBtn").addEventListener("click", async () => {
     await api("/api/logout", { method: "POST" });
     sessionUser = null;
     setDashboardState();
@@ -1129,8 +1162,7 @@ if (urlError) {
     ? "Google sign-in was cancelled."
     : "Google sign-in failed. Please try again or use your password.";
   el.classList.remove("hidden");
-  // Switch to dashboard view so the error is visible
-  document.querySelector("[data-view='dashboard']").click();
-  // Clean the URL
+  // Open the sign-in modal so the error is visible
+  $("#signInModal").classList.remove("hidden");
   history.replaceState(null, "", "/");
 }
