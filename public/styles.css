@@ -945,21 +945,27 @@ legend {
 
 .modal {
   background: var(--surface);
-  border: 1px solid var(--red);
+  border: 1px solid var(--gold);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
   max-width: 480px;
-  padding: 28px;
+  padding: 32px;
   width: 90%;
 }
 
 .modal h3 {
-  color: var(--red);
+  color: var(--gold);
   font-size: 18px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .modal p {
