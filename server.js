@@ -685,6 +685,16 @@ async function handleApi(req, res) {
     return;
   }
 
+  // Diagnostic — remove after debugging
+  if (req.method === "GET" && url.pathname === "/api/auth/check") {
+    send(res, 200, {
+      googleConfigured: Boolean((process.env.GOOGLE_CLIENT_ID || "").trim()),
+      clientIdLen: (process.env.GOOGLE_CLIENT_ID || "").length,
+      appUrl: APP_URL
+    });
+    return;
+  }
+
   // ── Google OAuth ────────────────────────────────────────────────────────────
 
   if (req.method === "GET" && url.pathname === "/api/auth/google") {
@@ -803,7 +813,6 @@ initDataDir().then(() => {
   server.listen(port, () => {
     console.log(`PD roster running at http://localhost:${port}`);
     console.log(`Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "CONFIGURED" : "NOT CONFIGURED"} (len=${(process.env.GOOGLE_CLIENT_ID||"").length})`);
-    console.log(`APP_URL: ${APP_URL}`);
     console.log(`APP_URL: ${APP_URL}`);
   });
 });
