@@ -362,12 +362,42 @@ function fillEntrySelects() {
     )
     .join("");
 
-  // Callsign dropdown (all from roster)
-  const callsigns = [...new Set(rosterData.roster.map((e) => e.callsign).filter(Boolean))].sort();
-  $("#callsignPicker").innerHTML = [
-    `<option value="">— New callsign —</option>`,
-    ...callsigns.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
-  ].join("");
+  // Callsign dropdown — populated by rank, see populateEntryCallsigns()
+}
+
+function populateEntryCallsigns(rank, currentCallsign = "") {
+  const picker = $("#callsignPicker");
+  if (!rank) {
+    picker.innerHTML = `<option value="">— Select a rank first —</option>`;
+    if (currentCallsign) {
+      const opt = document.createElement("option");
+      opt.value = currentCallsign;
+      opt.textContent = currentCallsign;
+      picker.appendChild(opt);
+      picker.value = currentCallsign;
+    }
+    return;
+  }
+  // Slots that are vacant AND match this rank, plus the entry's own current callsign
+  const slots = rosterData.roster.filter(
+    (e) => (e.vacant || e.activity === "Vacant" || !e.name) && cleanRank(e.rank) === cleanRank(rank)
+  );
+  const options = [`<option value="">— Select callsign —</option>`];
+  // Always include current callsign at the top if it exists
+  if (currentCallsign && !slots.find((e) => e.callsign === currentCallsign)) {
+    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (current)</option>`);
+  }
+  if (slots.length) {
+    slots.sort((a, b) => {
+      const na = parseInt(a.callsign, 10), nb = parseInt(b.callsign, 10);
+      return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a.callsign).localeCompare(String(b.callsign));
+    });
+    slots.forEach((e) => options.push(`<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`));
+  } else if (!currentCallsign) {
+    options.push(`<option value="" disabled>No vacant slots for this rank</option>`);
+  }
+  picker.innerHTML = options.join("");
+  if (currentCallsign) picker.value = currentCallsign;
 }
 
 function entryToForm(entry) {
@@ -375,19 +405,11 @@ function entryToForm(entry) {
   const fields = form.elements;
   fields.id.value = entry?.id || "";
 
-  // Callsign — ensure the option exists (handles new entries not yet in dropdown)
-  const callsignVal = entry?.callsign || "";
-  const callsignPicker = $("#callsignPicker");
-  if (callsignVal && !callsignPicker.querySelector(`option[value="${callsignVal.replace(/"/g, '\\"')}"]`)) {
-    const opt = document.createElement("option");
-    opt.value = callsignVal;
-    opt.textContent = callsignVal;
-    callsignPicker.prepend(opt);
-  }
-  fields.callsign.value = callsignVal;
-
   fields.name.value = entry?.name || "";
   fields.rank.value = entry?.rank || "";
+
+  // Callsign — filtered to vacant slots matching rank, plus current callsign
+  populateEntryCallsigns(entry?.rank || "", entry?.callsign || "");
   fields.activity.value = entry?.activity || "";
   fields.promotionDate.value = toDateInputValue(entry?.promotionDate || "");
   fields.notes.value = entry?.notes || "";
@@ -1133,6 +1155,12 @@ function wireEvents() {
     selectedEntryId = null;
     entryToForm(null);
     renderEntryList();
+  });
+
+  // When rank changes in entry editor, refresh the callsign picker to match
+  $("#rankPicker").addEventListener("change", (e) => {
+    const currentCallsign = $("#callsignPicker").value;
+    populateEntryCallsigns(e.target.value, currentCallsign);
   });
 
   $("#entryForm").addEventListener("submit", async (event) => {
