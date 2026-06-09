@@ -379,37 +379,21 @@ function fillEntrySelects() {
 
 function populateEntryCallsigns(rank, currentCallsign = "") {
   const picker = $("#callsignPicker");
-  if (!rank) {
-    picker.innerHTML = `<option value="">— Select a rank first —</option>`;
-    if (currentCallsign) {
-      const opt = document.createElement("option");
-      opt.value = currentCallsign;
-      opt.textContent = currentCallsign;
-      picker.appendChild(opt);
-      picker.value = currentCallsign;
-    }
-    return;
-  }
-  // Slots that are vacant AND match this rank, plus the entry's own current callsign
-  const slots = rosterData.roster.filter(
-    (e) => (e.vacant || e.activity === "Vacant" || !e.name) && cleanRank(e.rank) === cleanRank(rank)
-  );
-  const options = [`<option value="">— Select callsign —</option>`];
-  // Always include current callsign at the top if it exists
-  if (currentCallsign && !slots.find((e) => e.callsign === currentCallsign)) {
-    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (current)</option>`);
-  }
-  if (slots.length) {
-    slots.sort((a, b) => {
-      const na = parseInt(a.callsign, 10), nb = parseInt(b.callsign, 10);
-      return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a.callsign).localeCompare(String(b.callsign));
-    });
-    slots.forEach((e) => options.push(`<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`));
-  } else if (!currentCallsign) {
-    options.push(`<option value="" disabled>No vacant slots for this rank</option>`);
-  }
-  picker.innerHTML = options.join("");
-  if (currentCallsign) picker.value = currentCallsign;
+  const datalist = $("#callsignOptions");
+  // Suggest vacant slots matching this rank (or all vacant if no rank)
+  const slots = rank
+    ? rosterData.roster.filter(
+        (e) => (e.vacant || e.activity === "Vacant" || !e.name) && cleanRank(e.rank) === cleanRank(rank)
+      )
+    : rosterData.roster.filter((e) => e.vacant || e.activity === "Vacant" || !e.name);
+  slots.sort((a, b) => {
+    const na = parseInt(a.callsign, 10), nb = parseInt(b.callsign, 10);
+    return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a.callsign).localeCompare(String(b.callsign));
+  });
+  datalist.innerHTML = slots
+    .map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`)
+    .join("");
+  picker.value = currentCallsign;
 }
 
 function entryToForm(entry) {

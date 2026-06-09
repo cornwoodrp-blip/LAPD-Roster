@@ -354,7 +354,10 @@
               <h3 id="entryFormTitle">Edit roster entry</h3>
               <input type="hidden" name="id">
               <div class="form-grid">
-                <label><span>Callsign</span><select name="callsign" id="callsignPicker"></select></label>
+                <label><span>Callsign</span>
+                  <input name="callsign" id="callsignPicker" list="callsignOptions" placeholder="Pick or type a callsign" autocomplete="off">
+                  <datalist id="callsignOptions"></datalist>
+                </label>
                 <label><span>Name</span><input name="name"></label>
                 <label><span>Rank</span><select name="rank" id="rankPicker"></select></label>
                 <label><span>Activity</span><select name="activity" id="activityPicker"></select></label>
