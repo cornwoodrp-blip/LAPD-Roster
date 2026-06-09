@@ -63,10 +63,7 @@ async function bodyJson(req) {
 
 // ── Google OAuth helpers ────────────────────────────────────────────────────
 
-const GOOGLE_CLIENT_ID     = (process.env.GOOGLE_CLIENT_ID     || "").trim();
-const GOOGLE_CLIENT_SECRET = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
-const APP_URL              = (process.env.APP_URL               || "http://localhost:3000").replace(/\/$/, "");
-const GOOGLE_REDIRECT_URI  = `${APP_URL}/api/auth/google/callback`;
+const APP_URL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 
 function httpsPost(urlStr, body) {
   return new Promise((resolve, reject) => {
@@ -691,14 +688,16 @@ async function handleApi(req, res) {
   // ── Google OAuth ────────────────────────────────────────────────────────────
 
   if (req.method === "GET" && url.pathname === "/api/auth/google") {
-    if (!GOOGLE_CLIENT_ID) {
+    const clientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+    const redirectUri = `${APP_URL}/api/auth/google/callback`;
+    if (!clientId) {
       send(res, 503, { error: "Google login is not configured." });
       return;
     }
     const state = crypto.randomBytes(16).toString("hex");
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
-    authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI);
+    authUrl.searchParams.set("client_id", clientId);
+    authUrl.searchParams.set("redirect_uri", redirectUri);
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("scope", "openid email profile");
     authUrl.searchParams.set("state", state);
@@ -709,6 +708,9 @@ async function handleApi(req, res) {
   }
 
   if (req.method === "GET" && url.pathname === "/api/auth/google/callback") {
+    const clientId     = (process.env.GOOGLE_CLIENT_ID     || "").trim();
+    const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
+    const redirectUri  = `${APP_URL}/api/auth/google/callback`;
     const code = url.searchParams.get("code");
     if (!code) {
       res.writeHead(302, { location: "/?error=google_denied" });
@@ -719,9 +721,9 @@ async function handleApi(req, res) {
       // Exchange code for tokens
       const tokens = await httpsPost("https://oauth2.googleapis.com/token", {
         code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: GOOGLE_REDIRECT_URI,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
         grant_type: "authorization_code"
       });
       if (!tokens.access_token) throw new Error("No access token returned");
@@ -800,7 +802,8 @@ const server = http.createServer(async (req, res) => {
 initDataDir().then(() => {
   server.listen(port, () => {
     console.log(`PD roster running at http://localhost:${port}`);
-    console.log(`Google OAuth: ${GOOGLE_CLIENT_ID ? "CONFIGURED" : "NOT CONFIGURED"}`);
+    console.log(`Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "CONFIGURED" : "NOT CONFIGURED"} (len=${(process.env.GOOGLE_CLIENT_ID||"").length})`);
+    console.log(`APP_URL: ${APP_URL}`);
     console.log(`APP_URL: ${APP_URL}`);
   });
 });
