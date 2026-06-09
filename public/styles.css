@@ -836,6 +836,43 @@ legend {
   padding: 14px;
 }
 
+/* Application detail fields */
+#applicationDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.app-detail-field {
+  border-left: 2px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-left: 10px;
+}
+
+.app-detail-label {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+
+.app-detail-value {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.app-detail-empty {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
 .empty-state {
   color: var(--muted);
   padding: 16px;

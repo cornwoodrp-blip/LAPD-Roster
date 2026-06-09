@@ -477,18 +477,24 @@ function applicationToAcceptForm(application) {
   $("#acceptRankPicker").value = "";
   populateAcceptCallsigns("");
   $("#acceptFormTitle").textContent = application ? `Accept ${application.name}` : "Accept applicant";
-  $("#applicationDetail").textContent = application
-    ? [
-        application.age ? `Age: ${application.age}` : "",
-        application.factionCharacter ? `Faction char: ${application.factionCharacter}` : "",
-        application.leoExperience ? `LEO exp: ${application.leoExperience}` : "",
-        application.bannedHistory ? `Ban history: ${application.bannedHistory}` : "",
-        application.clips ? `Clips: ${application.clips}` : "",
-        application.roleplayPhilosophy ? `RP philosophy: ${application.roleplayPhilosophy}` : "",
-        application.characterDescription ? `Character: ${application.characterDescription}` : "",
-        application.status !== "pending" ? `Status: ${application.status}` : ""
-      ].filter(Boolean).join("\n\n")
-    : "Select a pending application to review it.";
+  const appFields = [
+    { label: "Age",                value: application?.age },
+    { label: "Faction Character",  value: application?.factionCharacter },
+    { label: "LEO Experience",     value: application?.leoExperience },
+    { label: "Ban History",        value: application?.bannedHistory },
+    { label: "Clips",              value: application?.clips },
+    { label: "RP Philosophy",      value: application?.roleplayPhilosophy },
+    { label: "Character Description", value: application?.characterDescription },
+    { label: "Status",             value: application?.status !== "pending" ? application?.status : null },
+  ].filter((f) => f.value);
+  $("#applicationDetail").innerHTML = application
+    ? appFields.map((f) =>
+        `<div class="app-detail-field">
+          <span class="app-detail-label">${escapeHtml(f.label)}</span>
+          <p class="app-detail-value">${escapeHtml(String(f.value))}</p>
+        </div>`
+      ).join("")
+    : `<p class="app-detail-empty">Select a pending application to review it.</p>`;
   $$("#acceptApplicationForm input, #acceptApplicationForm select, #acceptApplicationForm button").forEach((control) => {
     if (control.name === "name") return;
     if (control.id === "acceptCallsignPicker") return; // managed by rank selection
