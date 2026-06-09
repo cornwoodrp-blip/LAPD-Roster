@@ -494,7 +494,7 @@ const ROLE_PERMISSIONS = {
   viewer:     { canEditRoster: false, canManageUsers: false, canOnboard: false },
   onboarding: { canEditRoster: false, canManageUsers: false, canOnboard: true  },
   supervisor: { canEditRoster: true,  canManageUsers: false, canOnboard: false },
-  command:    { canEditRoster: true,  canManageUsers: true,  canOnboard: false },
+  command:    { canEditRoster: true,  canManageUsers: true,  canOnboard: true  },
   admin:      { canEditRoster: true,  canManageUsers: true,  canOnboard: true  },
 };
 
