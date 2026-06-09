@@ -12,6 +12,7 @@ const rosterPath = path.join(dataDir, "roster.json");
 const usersPath = path.join(dataDir, "users.json");
 const applicationsPath = path.join(dataDir, "applications.json");
 const onboardingPath = path.join(dataDir, "onboarding.json");
+const bugsPath = path.join(dataDir, "bugs.json");
 const port = Number(process.env.PORT || 3000);
 const sessions = new Map();
 
@@ -685,12 +686,57 @@ async function handleApi(req, res) {
     return;
   }
 
+  // ── Bug reports ──────────────────────────────────────────────────────────
+  if (req.method === "POST" && url.pathname === "/api/bugs") {
+    const payload = await bodyJson(req);
+    const description = String(payload.description || "").trim();
+    if (!description) { send(res, 400, { error: "Description is required." }); return; }
+    const data = await readJson(bugsPath);
+    const report = {
+      id: crypto.randomUUID(),
+      description,
+      section: String(payload.section || "").trim() || "Not specified",
+      submittedBy: user ? user.name : (String(payload.name || "").trim() || "Anonymous"),
+      submittedEmail: user ? user.email : (String(payload.email || "").trim() || ""),
+      submittedAt: new Date().toISOString(),
+      status: "open"
+    };
+    data.reports.unshift(report);
+    await writeJson(bugsPath, data);
+    send(res, 201, { report });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/bugs") {
+    if (!user || (!user.canManageUsers && !user.canEditRoster && user.role !== "admin")) {
+      send(res, 403, { error: "Forbidden" }); return;
+    }
+    const data = await readJson(bugsPath);
+    send(res, 200, data);
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname.match(/^\/api\/bugs\/[^/]+$/)) {
+    if (!user || (!user.canManageUsers && !user.canEditRoster && user.role !== "admin")) {
+      send(res, 403, { error: "Forbidden" }); return;
+    }
+    const id = decodeURIComponent(url.pathname.split("/")[3]);
+    const payload = await bodyJson(req);
+    const data = await readJson(bugsPath);
+    const idx = data.reports.findIndex((r) => r.id === id);
+    if (idx === -1) { send(res, 404, { error: "Report not found." }); return; }
+    data.reports[idx] = { ...data.reports[idx], status: payload.status || data.reports[idx].status };
+    await writeJson(bugsPath, data);
+    send(res, 200, { report: data.reports[idx] });
+    return;
+  }
+
   send(res, 404, { error: "Route not found." });
 }
 
 async function initDataDir() {
   await fs.mkdir(dataDir, { recursive: true });
-  for (const file of ["roster.json", "users.json", "applications.json", "onboarding.json"]) {
+  for (const file of ["roster.json", "users.json", "applications.json", "onboarding.json", "bugs.json"]) {
     const dest = path.join(dataDir, file);
     const seed = path.join(seedDir, file);
     try {

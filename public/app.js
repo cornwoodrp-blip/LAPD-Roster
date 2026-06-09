@@ -563,6 +563,8 @@ function setDashboardState() {
   $("#signedInAs").textContent = `${sessionUser.name} (${roleLabel})`;
   $("#userAdmin").classList.toggle("hidden", !sessionUser.canManageUsers);
   $(".applications-admin").classList.toggle("hidden", !canSeeApplications);
+  const canSeeBugs = sessionUser.canEditRoster || sessionUser.canManageUsers;
+  $("#bugReportsAdmin").classList.toggle("hidden", !canSeeBugs);
   // Hide roster entry editor for users who can't edit roster
   $("#entryForm").closest(".dashboard-grid").classList.toggle("hidden", !sessionUser.canEditRoster);
   $("#editNotice").textContent = sessionUser.canEditRoster
@@ -591,6 +593,7 @@ async function loadSession() {
   if (sessionUser?.canEditRoster || sessionUser?.canOnboard) await loadApplications();
   if (sessionUser?.canManageUsers) await loadUsers();
   if (sessionUser?.canOnboard || sessionUser?.role === "admin") await loadOnboarding();
+  if (sessionUser?.canEditRoster || sessionUser?.canManageUsers) await loadBugReports();
 }
 
 async function loadApplications() {
@@ -605,6 +608,38 @@ async function loadUsers() {
   const data = await api("/api/users");
   users = data.users;
   renderUsers();
+}
+
+let bugReports = [];
+
+async function loadBugReports() {
+  const data = await api("/api/bugs");
+  bugReports = data.reports;
+  renderBugReports();
+}
+
+function renderBugReports() {
+  const el = $("#bugReportList");
+  if (!bugReports.length) {
+    el.innerHTML = `<div class="bug-item"><span class="bug-item-meta">No bug reports yet.</span></div>`;
+    return;
+  }
+  el.innerHTML = bugReports.map((r) => {
+    const date = new Date(r.submittedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const statusClass = r.status === "closed" ? "closed" : "open";
+    return `<div class="bug-item">
+      <div class="bug-item-header">
+        <span class="bug-item-meta">${escapeHtml(r.section)} · ${escapeHtml(r.submittedBy)}${r.submittedEmail ? ` (${escapeHtml(r.submittedEmail)})` : ""} · ${date}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="bug-report-status ${statusClass}">${r.status}</span>
+          ${r.status === "open"
+            ? `<button class="bug-item-close" data-bug-id="${r.id}" data-action="close">Mark resolved</button>`
+            : `<button class="bug-item-close" data-bug-id="${r.id}" data-action="reopen">Reopen</button>`}
+        </div>
+      </div>
+      <div class="bug-item-desc">${escapeHtml(r.description)}</div>
+    </div>`;
+  }).join("");
 }
 
 function renderUsers() {
@@ -1044,6 +1079,7 @@ function wireEvents() {
     if (sessionUser.canEditRoster || sessionUser.canOnboard) await loadApplications();
     if (sessionUser.canManageUsers) await loadUsers();
     if (sessionUser.canOnboard || sessionUser.role === "admin") await loadOnboarding();
+    if (sessionUser.canEditRoster || sessionUser.canManageUsers) await loadBugReports();
     showView("dashboard");
     toast(`Welcome, ${sessionUser.name}.`);
   }
@@ -1130,6 +1166,61 @@ function wireEvents() {
   });
 
   $("#refreshApplicationsButton").addEventListener("click", () => loadApplications());
+  $("#refreshBugReportsBtn").addEventListener("click", () => loadBugReports());
+
+  // Bug report FAB + modal
+  $("#bugReportBtn").addEventListener("click", () => {
+    const form = $("#bugReportForm");
+    form.reset();
+    $("#bugReportNotice").classList.add("hidden");
+    // Hide anon fields if signed in
+    $("#bugAnonFields").classList.toggle("hidden", Boolean(sessionUser));
+    $("#bugReportModal").classList.remove("hidden");
+  });
+  $("#bugReportCancelBtn").addEventListener("click", () => $("#bugReportModal").classList.add("hidden"));
+  $("#bugReportModal").addEventListener("click", (e) => {
+    if (e.target === $("#bugReportModal")) $("#bugReportModal").classList.add("hidden");
+  });
+
+  $("#bugReportForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fields = e.target.elements;
+    const notice = $("#bugReportNotice");
+    try {
+      await api("/api/bugs", {
+        method: "POST",
+        body: JSON.stringify({
+          description: fields.description.value,
+          section: fields.section.value,
+          name: fields.name?.value || "",
+          email: fields.email?.value || "",
+        })
+      });
+      $("#bugReportModal").classList.add("hidden");
+      toast("Bug report submitted — thank you!");
+      if (sessionUser?.canEditRoster || sessionUser?.canManageUsers) await loadBugReports();
+    } catch (err) {
+      notice.textContent = err.message;
+      notice.classList.remove("hidden");
+    }
+  });
+
+  // Bug report resolve/reopen
+  $("#bugReportList").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-bug-id]");
+    if (!btn) return;
+    const id = btn.dataset.bugId;
+    const action = btn.dataset.action;
+    try {
+      await api(`/api/bugs/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: action === "close" ? "closed" : "open" })
+      });
+      await loadBugReports();
+    } catch (err) {
+      toast(err.message);
+    }
+  });
 
   $("#acceptRankPicker").addEventListener("change", () => {
     const rank = $("#acceptRankPicker").value;

@@ -402,9 +402,63 @@
             </form>
             <div class="mini-list users" id="userList"></div>
           </section>
+
+          <section id="bugReportsAdmin" class="editor-panel bug-reports-admin hidden">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Bug Reports</p>
+                <h3>Submitted reports</h3>
+              </div>
+              <button id="refreshBugReportsBtn" type="button" class="secondary">Refresh</button>
+            </div>
+            <div class="mini-list" id="bugReportList"></div>
+          </section>
         </div>
       </section>
     </main>
+
+    <!-- Bug report floating button -->
+    <button id="bugReportBtn" class="bug-report-fab" title="Report a bug">🐛</button>
+
+    <!-- Bug report modal -->
+    <div id="bugReportModal" class="modal-overlay hidden">
+      <div class="modal">
+        <h3>Report a Bug</h3>
+        <p>Found something broken? Let us know and we'll get it fixed.</p>
+        <form id="bugReportForm">
+          <label>
+            <span>What section is this on?</span>
+            <select name="section">
+              <option value="Public Roster">Public Roster</option>
+              <option value="Dashboard">Dashboard</option>
+              <option value="Onboarding">Onboarding</option>
+              <option value="Applications">Applications</option>
+              <option value="Sign In / Register">Sign In / Register</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>
+            <span>Describe the bug</span>
+            <textarea name="description" rows="4" placeholder="What happened? What did you expect to happen?" required></textarea>
+          </label>
+          <div id="bugAnonFields">
+            <label>
+              <span>Your name <em style="font-style:normal;color:var(--muted);font-size:11px">(optional)</em></span>
+              <input name="name" placeholder="e.g. John Smith">
+            </label>
+            <label>
+              <span>Your email <em style="font-style:normal;color:var(--muted);font-size:11px">(optional)</em></span>
+              <input name="email" type="email" placeholder="So we can follow up">
+            </label>
+          </div>
+          <div class="button-row">
+            <button type="submit">Submit Report</button>
+            <button type="button" id="bugReportCancelBtn" class="secondary">Cancel</button>
+          </div>
+          <p id="bugReportNotice" class="notice hidden"></p>
+        </form>
+      </div>
+    </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="/app.js" type="module"></script>
