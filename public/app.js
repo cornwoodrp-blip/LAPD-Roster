@@ -808,7 +808,11 @@ function switchApplyTab(tab) {
 
 const statusMessages = {
   pending: "Your application is under review by command staff. We'll be in touch via Discord.",
-  accepted: "Your application has been accepted! Please check your Discord for next steps.",
+  accepted: `Congratulations — your application has been accepted!<br><br>
+<strong>Your next steps:</strong><br>
+1. Join the <strong>LSPD Discord</strong> server.<br>
+2. Open a <strong>ticket</strong> to schedule your academy.<br>
+3. Include a <strong>screenshot of this approved status page</strong> in your ticket so staff can verify your application.`,
   rejected: "Your application was not accepted at this time. You're welcome to reapply in the future."
 };
 
@@ -818,7 +822,7 @@ function showApplicationStatus(application) {
   $("#statusName").textContent = application.name;
   $("#statusBadge").textContent = application.status.charAt(0).toUpperCase() + application.status.slice(1);
   $("#statusBadge").style.color = statusColors[application.status] || "";
-  $("#statusMessage").textContent = statusMessages[application.status] || "";
+  $("#statusMessage").innerHTML = statusMessages[application.status] || "";
   $("#statusDate").textContent = `Submitted ${formatDate(application.submittedAt)}` +
     (application.reviewedAt ? `  ·  Reviewed ${formatDate(application.reviewedAt)}` : "");
   $("#applicationStatusPanel").classList.remove("hidden");
