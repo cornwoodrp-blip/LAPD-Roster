@@ -810,7 +810,7 @@ const statusMessages = {
   pending: "Your application is under review by command staff. We'll be in touch via Discord.",
   accepted: `Congratulations — your application has been accepted!<br><br>
 <strong>Your next steps:</strong><br>
-1. Join the <strong>LSPD Discord</strong> server.<br>
+1. Join the <strong>LSPD Discord</strong> server: <a href="https://discord.gg/ZVNmN7qyGy" target="_blank" rel="noopener" style="color:var(--gold)">discord.gg/ZVNmN7qyGy</a><br>
 2. Open a <strong>ticket</strong> to schedule your academy.<br>
 3. Include a <strong>screenshot of this approved status page</strong> in your ticket so staff can verify your application.`,
   rejected: "Your application was not accepted at this time. You're welcome to reapply in the future."
