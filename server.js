@@ -399,10 +399,7 @@ async function handleApi(req, res) {
 
     const roster = await readJson(rosterPath);
     const application = applications.applications[index];
-    const notes = [
-      application.discord ? `discord: ${application.discord}` : "",
-      application.leoExperience ? `leo exp: ${application.leoExperience}` : ""
-    ].filter(Boolean).join(" | ");
+    const notes = application.discord ? application.discord : "";
 
     let entry;
     const vacantIndex = payload.vacantEntryId
