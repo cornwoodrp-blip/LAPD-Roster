@@ -965,7 +965,6 @@ function wireEvents() {
       const isPipeline = tab.dataset.tab === "pipeline";
       $("#pipelineTab").classList.toggle("hidden", !isPipeline);
       $("#applicationsTab").classList.toggle("hidden", isPipeline);
-      $("#refreshOnboardingBtn").classList.toggle("hidden", !isPipeline);
       $("#onboardingHeading").textContent = isPipeline ? "Recruit Pipeline" : "Application Inbox";
       if (!isPipeline) loadApplications();
     });
