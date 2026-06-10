@@ -748,7 +748,22 @@ async function initDataDir() {
       await fs.copyFile(seed, dest);
     }
   }
+  await syncSeedImport();
   await restoreMissingSlots();
+}
+
+// When a fresh roster import is shipped (seed importedAt newer than the live
+// file's), the import is the new source of truth — replace the live roster.
+async function syncSeedImport() {
+  if (path.resolve(dataDir) === path.resolve(seedDir)) return;
+  const seed = JSON.parse(await fs.readFile(path.join(seedDir, "roster.json"), "utf8"));
+  const live = await readJson(rosterPath);
+  const seedImported = Date.parse(seed.importedAt) || 0;
+  const liveImported = Date.parse(live.importedAt) || 0;
+  if (seedImported > liveImported) {
+    await writeJson(rosterPath, seed);
+    console.log(`Replaced live roster with seed import from ${seed.importedAt}.`);
+  }
 }
 
 // Older builds deleted roster entries outright instead of vacating them, so some
