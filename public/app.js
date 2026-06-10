@@ -900,7 +900,6 @@ const statusMessages = {
 1. Join the <strong>LSPD Discord</strong> server: <a href="https://discord.gg/ZVNmN7qyGy" target="_blank" rel="noopener" style="color:var(--gold)">discord.gg/ZVNmN7qyGy</a><br>
 2. Open a <strong>ticket</strong> to schedule your academy.<br>
 3. Include a <strong>screenshot of this approved status page</strong> in your ticket so staff can verify your application.`,
-  rejected: "Your application was not accepted at this time. You're welcome to reapply in the future."
 };
 
 const statusColors = { pending: "var(--gold)", accepted: "var(--green)", rejected: "var(--red)" };
@@ -909,7 +908,19 @@ function showApplicationStatus(application) {
   $("#statusName").textContent = application.name;
   $("#statusBadge").textContent = application.status.charAt(0).toUpperCase() + application.status.slice(1);
   $("#statusBadge").style.color = statusColors[application.status] || "";
-  $("#statusMessage").innerHTML = statusMessages[application.status] || "";
+
+  let message = statusMessages[application.status] || "";
+  if (application.status === "rejected") {
+    message = "Your application was not accepted at this time. You're welcome to reapply in the future.";
+    if (application.rejectionReason) {
+      message += `<br><br><strong>Reason:</strong> ${escapeHtml(application.rejectionReason)}`;
+    }
+    if (application.rejectionNotes) {
+      message += `<br><strong>Additional notes:</strong> ${escapeHtml(application.rejectionNotes)}`;
+    }
+  }
+  $("#statusMessage").innerHTML = message;
+
   $("#statusDate").textContent = `Submitted ${formatDate(application.submittedAt)}` +
     (application.reviewedAt ? `  ·  Reviewed ${formatDate(application.reviewedAt)}` : "");
   $("#applicationStatusPanel").classList.remove("hidden");
@@ -1073,6 +1084,10 @@ function wireEvents() {
     event.preventDefault();
     const form = event.currentTarget;
     const fields = form.elements;
+    const submitBtn = form.querySelector("[type=submit]");
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting…";
     try {
       const next = await api("/api/applications", {
         method: "POST",
@@ -1097,6 +1112,8 @@ function wireEvents() {
     } catch (error) {
       $("#applicationNotice").textContent = error.message;
       toast(error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Application";
     }
   });
 
