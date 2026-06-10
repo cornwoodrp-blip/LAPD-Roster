@@ -239,24 +239,33 @@ function renderPills(items) {
 }
 
 function renderEntryList() {
-  let rows = rosterData.roster.filter((entry) => !entry.vacant && entry.activity !== "Vacant");
+  let rows = [...rosterData.roster];
   if (entryListQuery) {
     const q = normalize(entryListQuery);
     rows = rows.filter((entry) =>
       normalize([entry.callsign, entry.name, entry.rank, entry.activity].join(" ")).includes(q)
     );
   }
-  $("#entryList").innerHTML = rows.length
-    ? rows
-        .map(
-          (entry) => `<button class="mini-item ${entry.id === selectedEntryId ? "active" : ""}" data-entry-id="${entry.id}">
+
+  // Group by rank category, preserving callsign sort within each group
+  const grouped = groupedRoster(rows);
+
+  if (!rows.length) {
+    $("#entryList").innerHTML = `<div class="empty-state">No entries match.</div>`;
+    return;
+  }
+
+  $("#entryList").innerHTML = grouped.map(([category, entries]) => {
+    const items = entries.map((entry) => {
+      const isVacant = entry.vacant || entry.activity === "Vacant" || !entry.name;
+      return `<button class="mini-item ${entry.id === selectedEntryId ? "active" : ""}${isVacant ? " mini-item-vacant" : ""}" data-entry-id="${entry.id}">
         <strong>${escapeHtml(entry.callsign || "-")}</strong>
-        <span>${escapeHtml(entry.name || "-")}<br><small>${escapeHtml(entry.rank || "-")}</small></span>
-        <small>${escapeHtml(entry.activity || "-")}</small>
-      </button>`
-        )
-        .join("")
-    : `<div class="empty-state">No active entries match.</div>`;
+        <span>${escapeHtml(isVacant ? "Vacant" : (entry.name || "-"))}<br><small>${escapeHtml(entry.rank || "-")}</small></span>
+        <small class="${isVacant ? "" : `status-${normalize(entry.activity)}`}">${escapeHtml(entry.activity || "Vacant")}</small>
+      </button>`;
+    }).join("");
+    return `<div class="entry-list-group-header">${escapeHtml(category)}</div>${items}`;
+  }).join("");
 }
 
 function renderCategoryOverview() {

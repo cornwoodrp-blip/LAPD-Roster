@@ -810,6 +810,25 @@ legend {
   grid-template-columns: 1fr auto;
 }
 
+.entry-list-group-header {
+  background: rgba(212,168,32,.06);
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  padding: 5px 12px;
+  text-transform: uppercase;
+}
+
+.mini-item-vacant {
+  opacity: 0.45;
+}
+
+.mini-item-vacant:hover {
+  opacity: 1;
+}
+
 .user-group-header {
   align-items: center;
   background: rgba(212,168,32,.06);
