@@ -364,9 +364,12 @@ async function handleApi(req, res) {
       send(res, 404, { error: "Application not found." });
       return;
     }
+    const rejPayload = await bodyJson(req).catch(() => ({}));
     data.applications[index] = sanitizeApplication({
       ...data.applications[index],
       status: "rejected",
+      rejectionReason: String(rejPayload.reason || "").trim() || null,
+      rejectionNotes: String(rejPayload.notes || "").trim() || null,
       reviewedAt: new Date().toISOString(),
       reviewedBy: user.email
     }, data.applications[index]);

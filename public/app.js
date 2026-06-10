@@ -470,6 +470,8 @@ function applicationToAcceptForm(application) {
     { label: "RP Philosophy",      value: application?.roleplayPhilosophy },
     { label: "Character Description", value: application?.characterDescription },
     { label: "Status",             value: application?.status !== "pending" ? application?.status : null },
+    { label: "Rejection Reason",   value: application?.rejectionReason },
+    { label: "Rejection Notes",    value: application?.rejectionNotes },
   ].filter((f) => f.value);
   $("#applicationDetail").innerHTML = application
     ? appFields.map((f) =>
@@ -1377,16 +1379,35 @@ function wireEvents() {
     }
   });
 
-  $("#rejectApplicationButton").addEventListener("click", async () => {
+  $("#rejectApplicationButton").addEventListener("click", () => {
     const id = $("#acceptApplicationForm").elements.applicationId.value;
-    if (!id || !sessionUser?.canEditRoster) return;
+    if (!id) return;
+    const app = applications.find((a) => a.id === id);
+    $("#rejectApplicantName").textContent = app?.name || "this applicant";
+    $("#rejectForm").reset();
+    $("#rejectModal").classList.remove("hidden");
+  });
+
+  $("#rejectCancelBtn").addEventListener("click", () => $("#rejectModal").classList.add("hidden"));
+  $("#rejectModal").addEventListener("click", (e) => {
+    if (e.target === $("#rejectModal")) $("#rejectModal").classList.add("hidden");
+  });
+
+  $("#rejectForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = $("#acceptApplicationForm").elements.applicationId.value;
+    const fields = e.target.elements;
     try {
-      await api(`/api/applications/${encodeURIComponent(id)}/reject`, { method: "POST" });
+      await api(`/api/applications/${encodeURIComponent(id)}/reject`, {
+        method: "POST",
+        body: JSON.stringify({ reason: fields.reason.value, notes: fields.notes.value })
+      });
+      $("#rejectModal").classList.add("hidden");
       selectedApplicationId = null;
       await loadApplications();
       toast("Application rejected.");
-    } catch (error) {
-      toast(error.message);
+    } catch (err) {
+      toast(err.message);
     }
   });
 

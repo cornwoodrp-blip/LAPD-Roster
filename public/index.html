@@ -327,6 +327,40 @@
         </div>
       </div>
 
+      <!-- Reject application modal -->
+      <div id="rejectModal" class="modal-overlay hidden">
+        <div class="modal">
+          <h3>Reject Application</h3>
+          <p>Select a reason for rejecting <strong id="rejectApplicantName"></strong>'s application.</p>
+          <form id="rejectForm">
+            <label>
+              <span>Rejection Reason</span>
+              <select name="reason" required>
+                <option value="">— Select a reason —</option>
+                <option value="Basic character description">Basic character description</option>
+                <option value="Lack of RP experience">Lack of RP experience</option>
+                <option value="AI-generated responses detected">AI-generated responses detected</option>
+                <option value="Insufficient LEO experience">Insufficient LEO experience</option>
+                <option value="Below minimum age requirement">Below minimum age requirement</option>
+                <option value="Active ban history">Active ban history</option>
+                <option value="Poor roleplay philosophy">Poor roleplay philosophy</option>
+                <option value="No faction character">No faction character</option>
+                <option value="Duplicate application">Duplicate application</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label>
+              <span>Additional notes <em style="font-style:normal;color:var(--muted);font-size:11px">(optional)</em></span>
+              <textarea name="notes" rows="3" placeholder="Any additional context…"></textarea>
+            </label>
+            <div class="button-row">
+              <button type="submit" class="danger">Reject Application</button>
+              <button type="button" id="rejectCancelBtn" class="secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Terminate confirmation modal -->
       <div id="terminateModal" class="modal-overlay hidden">
         <div class="modal">
