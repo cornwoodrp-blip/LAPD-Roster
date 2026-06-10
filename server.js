@@ -748,6 +748,42 @@ async function initDataDir() {
       await fs.copyFile(seed, dest);
     }
   }
+  await restoreMissingSlots();
+}
+
+// Older builds deleted roster entries outright instead of vacating them, so some
+// callsigns are gone from the live data. Re-add any callsign that exists in the
+// seed roster but not in the live roster, as a vacant slot with its seed rank.
+async function restoreMissingSlots() {
+  if (path.resolve(dataDir) === path.resolve(seedDir)) return;
+  const seed = JSON.parse(await fs.readFile(path.join(seedDir, "roster.json"), "utf8"));
+  const live = await readJson(rosterPath);
+  const liveCallsigns = new Set(
+    live.roster.map((entry) => String(entry.callsign || "").trim()).filter(Boolean)
+  );
+  const missing = seed.roster.filter((entry) => {
+    const callsign = String(entry.callsign || "").trim();
+    return callsign && !liveCallsigns.has(callsign);
+  });
+  if (!missing.length) return;
+  for (const entry of missing) {
+    live.roster.push({
+      ...entry,
+      id: entry.id || crypto.randomUUID(),
+      name: "",
+      activity: "Vacant",
+      vacant: true,
+      notes: "",
+      employeeNotes: "",
+      promotionDate: "",
+      tig: "",
+      clearedForPatrol: false
+    });
+  }
+  live.updatedAt = new Date().toISOString();
+  live.updatedBy = "system:restore-missing-slots";
+  await writeJson(rosterPath, live);
+  console.log(`Restored ${missing.length} missing roster slot(s) from seed.`);
 }
 
 const server = http.createServer(async (req, res) => {
