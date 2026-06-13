@@ -74,7 +74,7 @@ function toast(message) {
   const element = $("#toast");
   element.textContent = message;
   element.classList.add("show");
-  setTimeout(() => element.classList.remove("show"), 2200);
+  setTimeout(() => element.classList.remove("show"), 3500);
 }
 
 async function api(path, options = {}) {
@@ -951,6 +951,9 @@ function showView(view) {
     loadOnboarding();
     if (sessionUser?.canEditRoster || sessionUser?.canOnboard) loadApplications();
   }
+  // Keep the URL hash in sync so refresh stays on the current tab
+  const hash = view === "public" ? "" : `#${view}`;
+  history.replaceState(null, "", hash || location.pathname + location.search);
 }
 
 function wireEvents() {
@@ -1487,5 +1490,14 @@ wireEvents();
 await loadRoster();
 entryToForm(null);
 await loadSession();
+// After session loads, restore the tab from the URL hash (permission-safe)
+const hashView = location.hash.slice(1);
+if (hashView === "apply") {
+  showView("apply");
+} else if (hashView === "dashboard" && sessionUser?.canEditRoster) {
+  showView("dashboard");
+} else if (hashView === "onboarding" && (sessionUser?.canOnboard || sessionUser?.role === "admin")) {
+  showView("onboarding");
+}
 await checkSavedApplicationStatus();
 

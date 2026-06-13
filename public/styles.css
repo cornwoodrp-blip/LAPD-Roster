@@ -1281,11 +1281,23 @@ legend {
 /* ── Responsive ── */
 
 @media (max-width: 900px) {
-  .topbar,
   .dashboard-head {
     align-items: stretch;
     flex-direction: column;
   }
+
+  .topbar {
+    display: grid;
+    grid-template-areas: "brand auth" "nav nav";
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .topbar-brand { grid-area: brand; }
+  .nav          { grid-area: nav; width: 100%; }
+  #authArea     { grid-area: auth; }
 
   .summary-grid,
   .category-overview,
@@ -1297,11 +1309,72 @@ legend {
     grid-template-columns: 1fr;
   }
 
-  .nav {
-    width: 100%;
-  }
-
   .nav-button {
     flex: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Compact badge + hide eyebrow on phone */
+  .lspd-badge  { width: 36px; }
+  .eyebrow     { display: none; }
+  h1           { font-size: 14px; }
+
+  /* Nav buttons: smaller text so 4 fit on one row */
+  .nav-button {
+    font-size: 10px;
+    letter-spacing: 0.1px;
+    padding: 9px 6px;
+  }
+
+  /* User pill: hide name, keep sign-out */
+  .user-pill      { padding: 5px 6px; }
+  .user-pill span { display: none; }
+
+  /* Summary: 2-col grid on phone */
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Category cards: 2 per row */
+  .category-overview { grid-template-columns: repeat(2, 1fr); }
+
+  /* Onboarding header: stack title above tabs on phone */
+  .kanban-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .onboarding-tabs {
+    width: 100%;
+  }
+  .onboarding-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+
+  /* Kanban: touch-friendly horizontal scroll */
+  .kanban-board {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    grid-template-columns: repeat(6, minmax(150px, 1fr));
+  }
+  .kanban-col {
+    min-height: 300px;
+    scroll-snap-align: start;
+  }
+
+  /* Toast: top-center on mobile so it's not hidden by FAB */
+  .toast {
+    bottom: auto;
+    left: 16px;
+    right: 16px;
+    top: 72px;
+    transform: translateY(-6px);
+    width: auto;
+    text-align: center;
+  }
+  .toast.show {
+    transform: translateY(0);
   }
 }
