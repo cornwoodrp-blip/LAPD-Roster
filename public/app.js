@@ -939,6 +939,13 @@ async function checkSavedApplicationStatus() {
   }
 }
 
+function closeMobileNav() {
+  const nav = $(".nav");
+  const btn = $("#hamburgerBtn");
+  if (nav) nav.classList.remove("mobile-open");
+  if (btn) btn.setAttribute("aria-expanded", "false");
+}
+
 function showView(view) {
   $$(".nav-button").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.view === view);
@@ -951,6 +958,7 @@ function showView(view) {
     loadOnboarding();
     if (sessionUser?.canEditRoster || sessionUser?.canOnboard) loadApplications();
   }
+  closeMobileNav();
   // Keep the URL hash in sync so refresh stays on the current tab
   const hash = view === "public" ? "" : `#${view}`;
   history.replaceState(null, "", hash || location.pathname + location.search);
@@ -963,6 +971,20 @@ function wireEvents() {
 
   $$(".nav-button").forEach((button) => {
     button.addEventListener("click", () => showView(button.dataset.view));
+  });
+
+  $("#hamburgerBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const nav = $(".nav");
+    const isOpen = nav.classList.toggle("mobile-open");
+    $("#hamburgerBtn").setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!$(".nav").classList.contains("mobile-open")) return;
+    if (!$(".nav").contains(e.target) && e.target !== $("#hamburgerBtn")) {
+      closeMobileNav();
+    }
   });
 
   $("#refreshOnboardingBtn").addEventListener("click", () => {

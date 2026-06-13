@@ -40,6 +40,7 @@ textarea {
   gap: 24px;
   justify-content: space-between;
   padding: 16px clamp(16px, 4vw, 48px);
+  position: relative;
 }
 
 .topbar-brand {
@@ -85,6 +86,15 @@ main {
 .nav {
   display: flex;
   gap: 8px;
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: 1px solid #2a4060;
+  color: var(--ink);
+  display: none;
+  font-size: 20px;
+  padding: 6px 10px;
 }
 
 /* ── Buttons ── */
@@ -1320,22 +1330,104 @@ legend {
   .eyebrow     { display: none; }
   h1           { font-size: 14px; }
 
-  /* Nav buttons: smaller text so 4 fit on one row */
-  .nav-button {
-    font-size: 10px;
-    letter-spacing: 0.1px;
-    padding: 9px 6px;
+  /* Hamburger replaces the nav row on phone */
+  .topbar {
+    grid-template-areas: "brand hbg auth";
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: hbg;
+  }
+
+  /* Nav hidden by default; shown as dropdown when .mobile-open */
+  .nav {
+    background: #040c16;
+    border-bottom: 2px solid var(--gold);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    grid-area: unset;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 100%;
+    z-index: 200;
+  }
+
+  .nav.mobile-open {
+    display: flex;
+  }
+
+  .nav.mobile-open .nav-button {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    padding: 14px 20px;
+    text-align: left;
+    width: 100%;
   }
 
   /* User pill: hide name, keep sign-out */
   .user-pill      { padding: 5px 6px; }
   .user-pill span { display: none; }
 
-  /* Summary: 2-col grid on phone */
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Summary metrics: compact 2-col */
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
 
-  /* Category cards: 2 per row */
-  .category-overview { grid-template-columns: repeat(2, 1fr); }
+  .metric {
+    padding: 10px 12px;
+  }
+
+  .metric strong {
+    font-size: 22px;
+  }
+
+  /* Category overview: horizontal scroll strip */
+  .category-overview {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+
+  .category-card {
+    flex-shrink: 0;
+    min-height: auto;
+    min-width: 80px;
+    padding: 8px 10px;
+  }
+
+  .category-card strong {
+    font-size: 22px;
+  }
+
+  /* Application list: smaller text for easier scrolling */
+  .applications .mini-item,
+  .application-item {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .applications .mini-item small,
+  .application-item small {
+    font-size: 10px;
+  }
 
   /* Onboarding header: stack title above tabs on phone */
   .kanban-head {
