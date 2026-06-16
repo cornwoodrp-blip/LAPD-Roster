@@ -277,6 +277,35 @@ async function handleApi(req, res) {
       send(res, 404, { error: "Roster entry not found." });
       return;
     }
+
+    const currentCallsign = String(data.roster[index].callsign || "").trim();
+    const newCallsign = String(payload.callsign || "").trim();
+    const callsignChanged = newCallsign && newCallsign !== currentCallsign;
+
+    if (callsignChanged) {
+      // Find the existing slot with the target callsign and move the person there
+      const targetIdx = data.roster.findIndex(
+        (e, i) => i !== index && String(e.callsign || "").trim() === newCallsign
+      );
+      if (targetIdx !== -1) {
+        // Move person's data into the target slot (preserve target slot's id/callsign)
+        data.roster[targetIdx] = sanitizeRosterEntry(payload, data.roster[targetIdx]);
+        // Vacate the source slot (restore its original callsign)
+        data.roster[index] = {
+          ...data.roster[index],
+          callsign: currentCallsign,
+          name: "", activity: "Vacant", vacant: true,
+          notes: "", employeeNotes: "", clearedForPatrol: false, promotionDate: "",
+          updatedAt: new Date().toISOString(),
+        };
+        data.updatedAt = new Date().toISOString();
+        data.updatedBy = user.email;
+        await writeJson(rosterPath, data);
+        send(res, 200, data.roster[targetIdx]);
+        return;
+      }
+    }
+
     data.roster[index] = sanitizeRosterEntry(payload, data.roster[index]);
     data.updatedAt = new Date().toISOString();
     data.updatedBy = user.email;
