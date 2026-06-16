@@ -386,7 +386,10 @@ function fillEntrySelects() {
   // Callsign dropdown — populated by rank, see populateEntryCallsigns()
 }
 
-function populateEntryCallsigns(rank, currentCallsign = "") {
+// `currentCallsign` is always offered as an option (so you can change rank
+// without moving slots). `selectCallsign` is what's pre-selected — pass "" to
+// force the user to choose, e.g. after changing rank.
+function populateEntryCallsigns(rank, currentCallsign = "", selectCallsign = currentCallsign) {
   const picker = $("#callsignPicker");
 
   if (!rank) {
@@ -407,13 +410,13 @@ function populateEntryCallsigns(rank, currentCallsign = "") {
   // Always include the current callsign even if the slot is occupied (editing in place)
   const currentInSlots = slots.some((e) => String(e.callsign).trim() === String(currentCallsign).trim());
   if (currentCallsign && !currentInSlots) {
-    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (current)</option>`);
+    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (keep current slot)</option>`);
   }
   options.push(...slots.map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`));
 
   picker.innerHTML = options.join("");
   picker.disabled = false;
-  picker.value = currentCallsign || "";
+  picker.value = selectCallsign || "";
 }
 
 function entryToForm(entry) {
@@ -1297,11 +1300,12 @@ function wireEvents() {
     renderEntryList();
   });
 
-  // When rank changes, repopulate callsign for the new rank.
-  // Keep the current slot as an option so users can change rank without moving slots.
+  // When rank changes, clear the callsign and force the user to pick an
+  // available slot for the new rank. The current slot stays in the list
+  // (as "keep current slot") so changing rank in place is still possible.
   $("#rankPicker").addEventListener("change", (e) => {
     const originalEntry = rosterData.roster.find((entry) => entry.id === selectedEntryId);
-    populateEntryCallsigns(e.target.value, originalEntry?.callsign || "");
+    populateEntryCallsigns(e.target.value, originalEntry?.callsign || "", "");
   });
 
   $("#entryForm").addEventListener("submit", async (event) => {

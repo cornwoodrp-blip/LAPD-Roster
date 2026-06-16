@@ -184,13 +184,26 @@ async function serveStatic(req, res) {
   try {
     const file = await fs.readFile(filePath);
     const ext = path.extname(filePath);
-    res.writeHead(200, { "content-type": mimeTypes[ext] || "application/octet-stream" });
+    res.writeHead(200, {
+      "content-type": mimeTypes[ext] || "application/octet-stream",
+      "cache-control": cacheControlFor(ext),
+    });
     res.end(file);
   } catch {
     const fallback = await fs.readFile(path.join(publicDir, "index.html"));
-    res.writeHead(200, { "content-type": mimeTypes[".html"] });
+    res.writeHead(200, {
+      "content-type": mimeTypes[".html"],
+      "cache-control": cacheControlFor(".html"),
+    });
     res.end(fallback);
   }
+}
+
+// HTML must always revalidate so deploys take effect immediately. Other assets
+// (app.js, styles.css) are busted via ?v= query params, so they can cache hard.
+function cacheControlFor(ext) {
+  if (ext === ".html" || ext === "") return "no-cache, must-revalidate";
+  return "public, max-age=31536000";
 }
 
 async function handleApi(req, res) {
