@@ -315,6 +315,22 @@
         </div>
       </div>
 
+      <!-- Promote / Reassign modal -->
+      <div id="promoteModal" class="modal-overlay hidden">
+        <div class="modal">
+          <h3>Promote / Reassign Officer</h3>
+          <p>Reassign <strong id="promoteOfficerName"></strong> to a new rank and callsign. Their current slot (<strong id="promoteCurrentSlot"></strong>) will be vacated and reopened for reuse.</p>
+          <div class="form-grid" style="margin-top:8px">
+            <label><span>New rank</span><select id="promoteRankPicker"></select></label>
+            <label><span>New callsign</span><select id="promoteCallsignPicker"></select></label>
+          </div>
+          <div class="button-row" style="margin-top:4px">
+            <button id="promoteConfirmBtn">Confirm Reassignment</button>
+            <button id="promoteCancelBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Cleared For Patrol confirmation modal -->
       <div id="clearForPatrolModal" class="modal-overlay hidden">
         <div class="modal">
@@ -415,6 +431,7 @@
               </div>
               <div class="button-row">
                 <button type="submit">Save entry</button>
+                <button id="promoteEntryButton" type="button" class="secondary">Promote / Reassign</button>
                 <button id="newEntryButton" type="button" class="secondary">New entry</button>
                 <button id="deleteEntryButton" type="button" class="danger">Delete</button>
               </div>
@@ -511,6 +528,6 @@
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=10" type="module"></script>
+    <script src="/app.js?v=11" type="module"></script>
   </body>
 </html>

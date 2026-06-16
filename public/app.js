@@ -12,6 +12,7 @@ let onboardingCards = [];
 let pendingTerminationId = null;
 let pendingAcademyCardId = null;
 let pendingClearForPatrolId = null;
+let promoteEntryId = null;
 let activeCategoryFilter = "";
 let entryListQuery = "";
 
@@ -443,6 +444,7 @@ function entryToForm(entry) {
   });
   $("#entryFormTitle").textContent = entry ? `Edit ${entry.callsign || entry.name || "entry"}` : "New roster entry";
   $("#deleteEntryButton").disabled = !entry;
+  $("#promoteEntryButton").disabled = !entry || !entry.name;
 }
 
 function populateAcceptRankDropdown() {
@@ -888,6 +890,43 @@ function populateAcademyCallsigns(rank) {
     : `<option value="">No vacant slots for this rank</option>`;
 }
 
+// ── Promote / Reassign flow ──
+// Opens a dedicated modal to move an officer to a new rank + vacant callsign.
+// The server vacates their old slot automatically (see PUT /api/roster swap).
+function openPromoteModal() {
+  const entry = rosterData.roster.find((e) => e.id === selectedEntryId);
+  if (!entry) { toast("Select an officer first."); return; }
+  if (!entry.name) { toast("This slot is vacant — there's no officer to promote."); return; }
+  promoteEntryId = entry.id;
+  $("#promoteOfficerName").textContent = entry.name;
+  $("#promoteCurrentSlot").textContent = `${entry.callsign || "—"} · ${entry.rank || "—"}`;
+  $("#promoteRankPicker").innerHTML = rankCategories
+    .map(
+      (cat) => `<optgroup label="${escapeHtml(cat.name)}">${cat.ranks
+        .map((r) => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`)
+        .join("")}</optgroup>`
+    )
+    .join("");
+  if (entry.rank) $("#promoteRankPicker").value = entry.rank;
+  populatePromoteCallsigns($("#promoteRankPicker").value, entry.callsign || "");
+  $("#promoteModal").classList.remove("hidden");
+}
+
+function populatePromoteCallsigns(rank, currentCallsign = "") {
+  const picker = $("#promoteCallsignPicker");
+  const vacant = rosterData.roster.filter(
+    (e) => (e.vacant || e.activity === "Vacant") && cleanRank(e.rank) === cleanRank(rank)
+  );
+  const options = [`<option value="">— Select callsign —</option>`];
+  // Allow promoting in place (rank change without moving slots)
+  if (currentCallsign) {
+    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (keep current slot)</option>`);
+  }
+  options.push(...vacant.map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`));
+  picker.innerHTML = options.join("");
+  picker.value = "";
+}
+
 function userToForm(user = {}) {
   const form = $("#userForm");
   const fields = form.elements;
@@ -1038,6 +1077,53 @@ function wireEvents() {
   $("#academyCancelBtn").addEventListener("click", () => {
     pendingAcademyCardId = null;
     $("#academyPassedModal").classList.add("hidden");
+  });
+
+  // ── Promote / Reassign modal ──
+  $("#promoteEntryButton").addEventListener("click", openPromoteModal);
+
+  $("#promoteRankPicker").addEventListener("change", () => {
+    const entry = rosterData.roster.find((e) => e.id === promoteEntryId);
+    populatePromoteCallsigns($("#promoteRankPicker").value, entry?.callsign || "");
+  });
+
+  $("#promoteConfirmBtn").addEventListener("click", async () => {
+    const entry = rosterData.roster.find((e) => e.id === promoteEntryId);
+    if (!entry) return;
+    const newRank = $("#promoteRankPicker").value;
+    const newCallsign = $("#promoteCallsignPicker").value;
+    if (!newCallsign) { toast("Please select a callsign."); return; }
+    const confirmBtn = $("#promoteConfirmBtn");
+    confirmBtn.disabled = true;
+    try {
+      const saved = await api(`/api/roster/${encodeURIComponent(entry.id)}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...entry, rank: newRank, callsign: newCallsign })
+      });
+      await loadRoster();
+      selectedEntryId = saved.id;
+      entryToForm(saved);
+      renderEntryList();
+      promoteEntryId = null;
+      $("#promoteModal").classList.add("hidden");
+      toast(`${entry.name} reassigned to ${newCallsign} (${newRank}).`);
+    } catch (err) {
+      toast(err.message);
+    } finally {
+      confirmBtn.disabled = false;
+    }
+  });
+
+  $("#promoteCancelBtn").addEventListener("click", () => {
+    promoteEntryId = null;
+    $("#promoteModal").classList.add("hidden");
+  });
+
+  $("#promoteModal").addEventListener("click", (e) => {
+    if (e.target === $("#promoteModal")) {
+      promoteEntryId = null;
+      $("#promoteModal").classList.add("hidden");
+    }
   });
 
   $("#academyPassedModal").addEventListener("click", (e) => {
