@@ -389,12 +389,13 @@
               <h3 id="entryFormTitle">Edit roster entry</h3>
               <input type="hidden" name="id">
               <div class="form-grid">
+                <label><span>Rank</span><select name="rank" id="rankPicker"></select></label>
                 <label><span>Callsign</span>
-                  <input name="callsign" id="callsignPicker" list="callsignOptions" placeholder="Pick or type a callsign" autocomplete="off">
-                  <datalist id="callsignOptions"></datalist>
+                  <select name="callsign" id="callsignPicker" disabled>
+                    <option value="">— Select a rank first —</option>
+                  </select>
                 </label>
                 <label><span>Name</span><input name="name"></label>
-                <label><span>Rank</span><select name="rank" id="rankPicker"></select></label>
                 <label><span>Activity</span><select name="activity" id="activityPicker"></select></label>
                 <label><span>Promotion date</span><input name="promotionDate" type="date"></label>
               </div>
@@ -510,6 +511,6 @@
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=7" type="module"></script>
+    <script src="/app.js?v=8" type="module"></script>
   </body>
 </html>

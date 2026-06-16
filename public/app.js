@@ -388,21 +388,32 @@ function fillEntrySelects() {
 
 function populateEntryCallsigns(rank, currentCallsign = "") {
   const picker = $("#callsignPicker");
-  const datalist = $("#callsignOptions");
-  // Suggest vacant slots matching this rank (or all vacant if no rank)
-  const slots = rank
-    ? rosterData.roster.filter(
-        (e) => (e.vacant || e.activity === "Vacant" || !e.name) && cleanRank(e.rank) === cleanRank(rank)
-      )
-    : rosterData.roster.filter((e) => e.vacant || e.activity === "Vacant" || !e.name);
+
+  if (!rank) {
+    picker.innerHTML = '<option value="">— Select a rank first —</option>';
+    picker.disabled = true;
+    return;
+  }
+
+  const slots = rosterData.roster.filter(
+    (e) => (e.vacant || e.activity === "Vacant" || !e.name) && cleanRank(e.rank) === cleanRank(rank)
+  );
   slots.sort((a, b) => {
     const na = parseInt(a.callsign, 10), nb = parseInt(b.callsign, 10);
     return (!isNaN(na) && !isNaN(nb)) ? na - nb : String(a.callsign).localeCompare(String(b.callsign));
   });
-  datalist.innerHTML = slots
-    .map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`)
-    .join("");
-  picker.value = currentCallsign;
+
+  const options = ['<option value="">— Select callsign —</option>'];
+  // Always include the current callsign even if the slot is occupied (editing in place)
+  const currentInSlots = slots.some((e) => String(e.callsign).trim() === String(currentCallsign).trim());
+  if (currentCallsign && !currentInSlots) {
+    options.push(`<option value="${escapeHtml(currentCallsign)}">${escapeHtml(currentCallsign)} (current)</option>`);
+  }
+  options.push(...slots.map((e) => `<option value="${escapeHtml(e.callsign)}">${escapeHtml(e.callsign)}</option>`));
+
+  picker.innerHTML = options.join("");
+  picker.disabled = false;
+  picker.value = currentCallsign || "";
 }
 
 function entryToForm(entry) {
@@ -1286,10 +1297,9 @@ function wireEvents() {
     renderEntryList();
   });
 
-  // When rank changes in entry editor, refresh the callsign picker to match
+  // When rank changes, reset callsign and repopulate for the new rank
   $("#rankPicker").addEventListener("change", (e) => {
-    const currentCallsign = $("#callsignPicker").value;
-    populateEntryCallsigns(e.target.value, currentCallsign);
+    populateEntryCallsigns(e.target.value, "");
   });
 
   $("#entryForm").addEventListener("submit", async (event) => {
