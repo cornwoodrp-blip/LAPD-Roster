@@ -445,6 +445,18 @@ function entryToForm(entry) {
   $("#entryFormTitle").textContent = entry ? `Edit ${entry.callsign || entry.name || "entry"}` : "New roster entry";
   $("#deleteEntryButton").disabled = !entry;
   $("#promoteEntryButton").disabled = !entry || !entry.name;
+
+  // Rank + callsign are locked when editing an existing officer — use the
+  // Promote / Reassign button to move someone. They stay editable for brand-new
+  // entries (where you still need to assign an initial rank and slot).
+  const editingExisting = Boolean(entry?.id);
+  $("#rankPicker").disabled = editingExisting;
+  if (editingExisting) {
+    // Show the plain callsign (no "keep current slot" labelling) while locked
+    $("#callsignPicker").innerHTML = `<option value="${escapeHtml(entry.callsign || "")}">${escapeHtml(entry.callsign || "—")}</option>`;
+    $("#callsignPicker").disabled = true;
+  }
+  $("#rankCallsignHint").classList.toggle("hidden", !editingExisting);
 }
 
 function populateAcceptRankDropdown() {
