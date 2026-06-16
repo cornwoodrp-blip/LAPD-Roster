@@ -1297,9 +1297,11 @@ function wireEvents() {
     renderEntryList();
   });
 
-  // When rank changes, reset callsign and repopulate for the new rank
+  // When rank changes, repopulate callsign for the new rank.
+  // Keep the current slot as an option so users can change rank without moving slots.
   $("#rankPicker").addEventListener("change", (e) => {
-    populateEntryCallsigns(e.target.value, "");
+    const originalEntry = rosterData.roster.find((entry) => entry.id === selectedEntryId);
+    populateEntryCallsigns(e.target.value, originalEntry?.callsign || "");
   });
 
   $("#entryForm").addEventListener("submit", async (event) => {
